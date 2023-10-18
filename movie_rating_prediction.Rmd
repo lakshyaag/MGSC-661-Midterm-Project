@@ -139,4 +139,3 @@ ggplot(data, aes(x = movie_budget, y = imdb_score)) +
   theme_pubr() +
   theme_lox()
 ```
-tyhjk
