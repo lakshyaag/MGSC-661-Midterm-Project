@@ -24,3 +24,6 @@ data$actor1_star_meter[data$actor1 == "Meryl Streep"]
 ```{r}
 data$release_year[data$colour_film == "Black and White"]
 ```
+
+#removing movie title, movie id, imdb link, release day, actor1, actor2, actor3, genre, movie meter
+#pick top 20 key words after splitting the key words column
