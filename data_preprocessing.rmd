@@ -8,6 +8,19 @@ output: html_notebook
 ```{r}
 data <- read.csv('./IMDB_data_Fall_2023.csv')
 attach(data)
-
 ```
 
+# Checking the unique values in the language column
+```{r}
+unique(data$maturity_rating)
+```
+
+#Finding all rows having Tom Hardy in the actor 1 column and printing the actor 1 star meter column
+```{r}
+data$actor1_star_meter[data$actor1 == "Meryl Streep"]
+```
+
+#finding all rows with black and white movies and print the release year column
+```{r}
+data$release_year[data$colour_film == "Black and White"]
+```
