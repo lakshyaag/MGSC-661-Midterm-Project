@@ -1,0 +1,13 @@
+---
+title: "Data Pre-Processing"
+output: html_notebook
+---
+
+
+# Importing Data
+```{r}
+data <- read.csv('./IMDB_data_Fall_2023.csv')
+attach(data)
+
+```
+
