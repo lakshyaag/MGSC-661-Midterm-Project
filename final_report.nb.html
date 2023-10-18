@@ -11,7 +11,7 @@
 
 
 
-<title>MGSC 661 - Midterm Project</title>
+<title>MGSC 661 - Midterm Project - Final Report</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1746,196 +1746,16 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">MGSC 661 - Midterm Project</h1>
+<h1 class="title toc-ignore">MGSC 661 - Midterm Project - Final
+Report</h1>
 
 </div>
 
 
 <!-- rnb-text-begin -->
-<div id="importing-data" class="section level1">
-<h1>Importing data</h1>
 <!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZSh2aXNyZWcpXG5yZXF1aXJlKGdsdWUpXG5yZXF1aXJlKGNhcilcbnJlcXVpcmUobG10ZXN0KVxucmVxdWlyZShzcGxpbmVzKVxucmVxdWlyZShwc3ljaClcbnJlcXVpcmUoc3RhcmdhemVyKVxucmVxdWlyZShwbG0pXG5yZXF1aXJlKGdncGxvdDIpXG5yZXF1aXJlKGdndGV4dClcbnJlcXVpcmUoZ2dwdWJyKVxucmVxdWlyZShzY2FsZXMpXG5yZXF1aXJlKGNhVG9vbHMpXG5yZXF1aXJlKG1ldGhvZHMpXG5yZXF1aXJlKGJvb3QpXG5cbndpbmRvd3NGb250cyhIZWx2ZXRpY2EgPSBcIlByb2R1Y3QgU2Fuc1wiKVxuYGBgIn0= -->
-<pre class="r"><code>require(visreg)
-require(glue)
-require(car)
-require(lmtest)
-require(splines)
-require(psych)
-require(stargazer)
-require(plm)
-require(ggplot2)
-require(ggtext)
-require(ggpubr)
-require(scales)
-require(caTools)
-require(methods)
-require(boot)
 
-windowsFonts(Helvetica = &quot;Product Sans&quot;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGhlbWVfbG94IDwtIGZ1bmN0aW9uKCkge1xuICAgIHRoZW1lKFxuICAgICAgICBwYW5lbC5ncmlkLm1ham9yLnggPSBlbGVtZW50X2xpbmUobGluZXdpZHRoID0gMC4zLCBjb2xvdXIgPSBcIiNjYmNiY2JcIiksXG4gICAgICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfbGluZShsaW5ld2lkdGggPSAwLjMsIGNvbG91ciA9IFwiI2NiY2JjYlwiKSxcbiAgICAgICAgcGxvdC50aXRsZSA9IGVsZW1lbnRfbWFya2Rvd24oXG4gICAgICAgICAgICBmYW1pbHkgPSBcIkhlbHZldGljYVwiLFxuICAgICAgICAgICAgc2l6ZSA9IDIyLFxuICAgICAgICAgICAgZmFjZSA9IFwiYm9sZFwiLFxuICAgICAgICAgICAgY29sb3IgPSBcIiMyMjIyMjJcIlxuICAgICAgICApLFxuICAgICAgICBwbG90LnN1YnRpdGxlID0gZWxlbWVudF90ZXh0KFxuICAgICAgICAgICAgZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIixcbiAgICAgICAgICAgIHNpemUgPSAxNixcbiAgICAgICAgICAgIG1hcmdpbiA9IG1hcmdpbigyLCAwLCAyLCAwKVxuICAgICAgICApLFxuICAgICAgICBwbG90LmNhcHRpb24gPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIiwgZmFjZSA9IFwiYm9sZFwiKSxcbiAgICAgICAgYXhpcy50ZXh0ID0gZWxlbWVudF90ZXh0KFxuICAgICAgICAgICAgZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIixcbiAgICAgICAgICAgIHNpemUgPSAxMixcbiAgICAgICAgICAgIGNvbG9yID0gXCIjMjIyMjIyXCJcbiAgICAgICAgKSxcbiAgICAgICAgYXhpcy50aXRsZSA9IGVsZW1lbnRfdGV4dChcbiAgICAgICAgICAgIGZhbWlseSA9IFwiSGVsdmV0aWNhXCIsXG4gICAgICAgICAgICBzaXplID0gMTQsXG4gICAgICAgICAgICBjb2xvciA9IFwiIzIyMjIyMlwiXG4gICAgICAgICksXG4gICAgICAgIGxlZ2VuZC50ZXh0ID0gZWxlbWVudF90ZXh0KGZhbWlseSA9IFwiSGVsdmV0aWNhXCIsIHNpemUgPSAxMiksXG4gICAgICAgIGxlZ2VuZC50aXRsZSA9IGVsZW1lbnRfdGV4dChcbiAgICAgICAgICAgIGZhbWlseSA9IFwiSGVsdmV0aWNhXCIsXG4gICAgICAgICAgICBzaXplID0gMTQsXG4gICAgICAgICAgICBmYWNlID0gXCJib2xkXCJcbiAgICAgICAgKSxcbiAgICAgICAgbGVnZW5kLnBvc2l0aW9uID0gXCJyaWdodFwiLFxuICAgICAgICBzdHJpcC50ZXh0ID0gZWxlbWVudF90ZXh0KFxuICAgICAgICAgICAgZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIixcbiAgICAgICAgICAgIHNpemUgPSAxMixcbiAgICAgICAgICAgIGhqdXN0ID0gMC41XG4gICAgICAgIClcbiAgICApXG59XG5gYGAifQ== -->
-<pre class="r"><code>theme_lox &lt;- function() {
-    theme(
-        panel.grid.major.x = element_line(linewidth = 0.3, colour = &quot;#cbcbcb&quot;),
-        panel.grid.major.y = element_line(linewidth = 0.3, colour = &quot;#cbcbcb&quot;),
-        plot.title = element_markdown(
-            family = &quot;Helvetica&quot;,
-            size = 22,
-            face = &quot;bold&quot;,
-            color = &quot;#222222&quot;
-        ),
-        plot.subtitle = element_text(
-            family = &quot;Helvetica&quot;,
-            size = 16,
-            margin = margin(2, 0, 2, 0)
-        ),
-        plot.caption = element_text(family = &quot;Helvetica&quot;, face = &quot;bold&quot;),
-        axis.text = element_text(
-            family = &quot;Helvetica&quot;,
-            size = 12,
-            color = &quot;#222222&quot;
-        ),
-        axis.title = element_text(
-            family = &quot;Helvetica&quot;,
-            size = 14,
-            color = &quot;#222222&quot;
-        ),
-        legend.text = element_text(family = &quot;Helvetica&quot;, size = 12),
-        legend.title = element_text(
-            family = &quot;Helvetica&quot;,
-            size = 14,
-            face = &quot;bold&quot;
-        ),
-        legend.position = &quot;right&quot;,
-        strip.text = element_text(
-            family = &quot;Helvetica&quot;,
-            size = 12,
-            hjust = 0.5
-        )
-    )
-}</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSA8LSByZWFkLmNzdignLi9JTURCX2RhdGFfRmFsbF8yMDIzLmNzdicpXG5hdHRhY2goZGF0YSlcbmBgYCJ9 -->
-<pre class="r"><code>data &lt;- read.csv(&#39;./IMDB_data_Fall_2023.csv&#39;)
-attach(data)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="exploratory-data-analysis" class="section level1">
-<h1>Exploratory data analysis</h1>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChkYXRhKVxuc3VtbWFyeShkYXRhKVxuYGBgIn0= -->
-<pre class="r"><code>head(data)
-summary(data)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<div id="data-cleaning" class="section level2">
-<h2>Data cleaning</h2>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBDaGVjayBmb3IgZHVwbGljYXRlc1xuZGF0YVtkdXBsaWNhdGVkKGRhdGEpXVxuYGBgIn0= -->
-<pre class="r"><code># Check for duplicates
-data[duplicated(data)]</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="univariate-distributions" class="section level2">
-<h2>Univariate distributions</h2>
-<div id="target-variable" class="section level3">
-<h3>Target variable</h3>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gaW1kYl9zY29yZSkpICsgXG4gIGdlb21faGlzdG9ncmFtKGJpbndpZHRoID0gMSkgK1xuICBzY2FsZV94X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3dpZHRoKHdpZHRoID0gMSkpICtcbiAgbGFicyh4ID0gXCJJTURiIFJhdGluZ1wiLCB5ID0gXCJOdW1iZXIgb2YgbW92aWVzXCIsIHRpdGxlID0gXCJEaXN0cmlidXRpb24gb2YgcmF0aW5nc1wiKSArXG4gIHRoZW1lX3B1YnIoKSArXG4gIHRoZW1lX2xveCgpXG5gYGAifQ== -->
-<pre class="r"><code>ggplot(data, aes(x = imdb_score)) + 
-  geom_histogram(binwidth = 1) +
-  scale_x_continuous(breaks = breaks_width(width = 1)) +
-  labs(x = &quot;IMDb Rating&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of ratings&quot;) +
-  theme_pubr() +
-  theme_lox()</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="movie-budget" class="section level3">
-<h3>Movie budget</h3>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gbW92aWVfYnVkZ2V0KSkgKyBcbiAgZ2VvbV9oaXN0b2dyYW0oYmlucyA9IDIwKSArXG4gIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCksIGxhYmVscyA9IGxhYmVsX2RvbGxhcihzY2FsZV9jdXQgPSBjdXRfc2hvcnRfc2NhbGUoKSkpICtcbiAgbGFicyh4ID0gXCJNb3ZpZSBidWRnZXRcIiwgeSA9IFwiTnVtYmVyIG9mIG1vdmllc1wiLCB0aXRsZSA9IFwiRGlzdHJpYnV0aW9uIG9mIG1vdmllIGJ1ZGdldHNcIikgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKVxuYGBgIn0= -->
-<pre class="r"><code>ggplot(data, aes(x = movie_budget)) + 
-  geom_histogram(bins = 20) +
-  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
-  labs(x = &quot;Movie budget&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of movie budgets&quot;) +
-  theme_pubr() +
-  theme_lox()</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="release-year" class="section level3">
-<h3>Release year</h3>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gcmVsZWFzZV95ZWFyKSkgK1xuICBnZW9tX2hpc3RvZ3JhbShiaW5zID0gMTApICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkobiA9IDEwKSkgK1xuICBsYWJzKHggPSBcIlJlbGVhc2UgWWVhclwiLCB5ID0gXCJOdW1iZXIgb2YgbW92aWVzXCIsIHRpdGxlID0gXCJEaXN0cmlidXRpb24gb2YgcmVsZWFzZSB5ZWFyXCIpICtcbiAgdGhlbWVfcHVicigpICtcbiAgdGhlbWVfbG94KClcbmBgYCJ9 -->
-<pre class="r"><code>ggplot(data, aes(x = release_year)) +
-  geom_histogram(bins = 10) +
-  scale_x_continuous(breaks = breaks_pretty(n = 10)) +
-  labs(x = &quot;Release Year&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of release year&quot;) +
-  theme_pubr() +
-  theme_lox()</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="number-of-faces" class="section level3">
-<h3>Number of faces</h3>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gbmJfZmFjZXMpKSArIFxuICBnZW9tX2hpc3RvZ3JhbSgpICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSkgK1xuICBsYWJzKHggPSBcIk51bWJlciBvZiBmYWNlc1wiLCB5ID0gXCJOdW1iZXIgb2YgbW92aWVzXCIsIHRpdGxlID0gXCJEaXN0cmlidXRpb24gb2YgbnVtYmVyIG9mIGZhY2VzIGluIHRoZSBtb3ZpZSBwb3N0ZXJcIikgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKVxuYGBgIn0= -->
-<pre class="r"><code>ggplot(data, aes(x = nb_faces)) + 
-  geom_histogram() +
-  scale_x_continuous(breaks = breaks_pretty()) +
-  labs(x = &quot;Number of faces&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of number of faces in the movie poster&quot;) +
-  theme_pubr() +
-  theme_lox()</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-</div>
-<div id="bivariate-distributions" class="section level2">
-<h2>Bivariate distributions</h2>
-<div id="movie-budgets-imdb-score" class="section level3">
-<h3>Movie budgets ~ IMDb Score</h3>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gbW92aWVfYnVkZ2V0LCB5ID0gaW1kYl9zY29yZSkpICtcbiAgZ2VvbV9wb2ludCgpICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGFiZWxzID0gbGFiZWxfZG9sbGFyKHNjYWxlX2N1dCA9IGN1dF9zaG9ydF9zY2FsZSgpKSkgK1xuICBsYWJzKHggPSBcIk1vdmllIGJ1ZGdldFwiLCB5ID0gXCJJTURiIFNjb3JlXCIsIHRpdGxlID0gXCJNb3ZpZSBidWRnZXQgYW5kIElNRGIgc2NvcmVcIikgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKVxuYGBgIn0= -->
-<pre class="r"><code>ggplot(data, aes(x = movie_budget, y = imdb_score)) +
-  geom_point() +
-  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
-  labs(x = &quot;Movie budget&quot;, y = &quot;IMDb Score&quot;, title = &quot;Movie budget and IMDb score&quot;) +
-  theme_pubr() +
-  theme_lox()</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-</div>
-</div>
-</div>
-
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIk1HU0MgNjYxIC0gTWlkdGVybSBQcm9qZWN0Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KDQojIEltcG9ydGluZyBkYXRhDQpgYGB7cn0NCnJlcXVpcmUodmlzcmVnKQ0KcmVxdWlyZShnbHVlKQ0KcmVxdWlyZShjYXIpDQpyZXF1aXJlKGxtdGVzdCkNCnJlcXVpcmUoc3BsaW5lcykNCnJlcXVpcmUocHN5Y2gpDQpyZXF1aXJlKHN0YXJnYXplcikNCnJlcXVpcmUocGxtKQ0KcmVxdWlyZShnZ3Bsb3QyKQ0KcmVxdWlyZShnZ3RleHQpDQpyZXF1aXJlKGdncHVicikNCnJlcXVpcmUoc2NhbGVzKQ0KcmVxdWlyZShjYVRvb2xzKQ0KcmVxdWlyZShtZXRob2RzKQ0KcmVxdWlyZShib290KQ0KDQp3aW5kb3dzRm9udHMoSGVsdmV0aWNhID0gIlByb2R1Y3QgU2FucyIpDQpgYGANCg0KYGBge3J9DQp0aGVtZV9sb3ggPC0gZnVuY3Rpb24oKSB7DQogICAgdGhlbWUoDQogICAgICAgIHBhbmVsLmdyaWQubWFqb3IueCA9IGVsZW1lbnRfbGluZShsaW5ld2lkdGggPSAwLjMsIGNvbG91ciA9ICIjY2JjYmNiIiksDQogICAgICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfbGluZShsaW5ld2lkdGggPSAwLjMsIGNvbG91ciA9ICIjY2JjYmNiIiksDQogICAgICAgIHBsb3QudGl0bGUgPSBlbGVtZW50X21hcmtkb3duKA0KICAgICAgICAgICAgZmFtaWx5ID0gIkhlbHZldGljYSIsDQogICAgICAgICAgICBzaXplID0gMjIsDQogICAgICAgICAgICBmYWNlID0gImJvbGQiLA0KICAgICAgICAgICAgY29sb3IgPSAiIzIyMjIyMiINCiAgICAgICAgKSwNCiAgICAgICAgcGxvdC5zdWJ0aXRsZSA9IGVsZW1lbnRfdGV4dCgNCiAgICAgICAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgICAgICAgc2l6ZSA9IDE2LA0KICAgICAgICAgICAgbWFyZ2luID0gbWFyZ2luKDIsIDAsIDIsIDApDQogICAgICAgICksDQogICAgICAgIHBsb3QuY2FwdGlvbiA9IGVsZW1lbnRfdGV4dChmYW1pbHkgPSAiSGVsdmV0aWNhIiwgZmFjZSA9ICJib2xkIiksDQogICAgICAgIGF4aXMudGV4dCA9IGVsZW1lbnRfdGV4dCgNCiAgICAgICAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgICAgICAgc2l6ZSA9IDEyLA0KICAgICAgICAgICAgY29sb3IgPSAiIzIyMjIyMiINCiAgICAgICAgKSwNCiAgICAgICAgYXhpcy50aXRsZSA9IGVsZW1lbnRfdGV4dCgNCiAgICAgICAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgICAgICAgc2l6ZSA9IDE0LA0KICAgICAgICAgICAgY29sb3IgPSAiIzIyMjIyMiINCiAgICAgICAgKSwNCiAgICAgICAgbGVnZW5kLnRleHQgPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gIkhlbHZldGljYSIsIHNpemUgPSAxMiksDQogICAgICAgIGxlZ2VuZC50aXRsZSA9IGVsZW1lbnRfdGV4dCgNCiAgICAgICAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgICAgICAgc2l6ZSA9IDE0LA0KICAgICAgICAgICAgZmFjZSA9ICJib2xkIg0KICAgICAgICApLA0KICAgICAgICBsZWdlbmQucG9zaXRpb24gPSAicmlnaHQiLA0KICAgICAgICBzdHJpcC50ZXh0ID0gZWxlbWVudF90ZXh0KA0KICAgICAgICAgICAgZmFtaWx5ID0gIkhlbHZldGljYSIsDQogICAgICAgICAgICBzaXplID0gMTIsDQogICAgICAgICAgICBoanVzdCA9IDAuNQ0KICAgICAgICApDQogICAgKQ0KfQ0KYGBgDQoNCmBgYHtyfQ0KZGF0YSA8LSByZWFkLmNzdignLi9JTURCX2RhdGFfRmFsbF8yMDIzLmNzdicpDQphdHRhY2goZGF0YSkNCmBgYA0KDQojIEV4cGxvcmF0b3J5IGRhdGEgYW5hbHlzaXMNCg0KYGBge3J9DQpoZWFkKGRhdGEpDQpzdW1tYXJ5KGRhdGEpDQpgYGANCg0KDQojIyBEYXRhIGNsZWFuaW5nDQoNCmBgYHtyfQ0KIyBDaGVjayBmb3IgZHVwbGljYXRlcw0KZGF0YVtkdXBsaWNhdGVkKGRhdGEpXQ0KYGBgDQojIyBVbml2YXJpYXRlIGRpc3RyaWJ1dGlvbnMNCg0KIyMjIFRhcmdldCB2YXJpYWJsZQ0KYGBge3J9DQpnZ3Bsb3QoZGF0YSwgYWVzKHggPSBpbWRiX3Njb3JlKSkgKyANCiAgZ2VvbV9oaXN0b2dyYW0oYmlud2lkdGggPSAxKSArDQogIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3Nfd2lkdGgod2lkdGggPSAxKSkgKw0KICBsYWJzKHggPSAiSU1EYiBSYXRpbmciLCB5ID0gIk51bWJlciBvZiBtb3ZpZXMiLCB0aXRsZSA9ICJEaXN0cmlidXRpb24gb2YgcmF0aW5ncyIpICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkNCmBgYA0KIyMjIE1vdmllIGJ1ZGdldA0KDQpgYGB7cn0NCmdncGxvdChkYXRhLCBhZXMoeCA9IG1vdmllX2J1ZGdldCkpICsgDQogIGdlb21faGlzdG9ncmFtKGJpbnMgPSAyMCkgKw0KICBzY2FsZV94X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpLCBsYWJlbHMgPSBsYWJlbF9kb2xsYXIoc2NhbGVfY3V0ID0gY3V0X3Nob3J0X3NjYWxlKCkpKSArDQogIGxhYnMoeCA9ICJNb3ZpZSBidWRnZXQiLCB5ID0gIk51bWJlciBvZiBtb3ZpZXMiLCB0aXRsZSA9ICJEaXN0cmlidXRpb24gb2YgbW92aWUgYnVkZ2V0cyIpICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkNCmBgYA0KDQojIyMgUmVsZWFzZSB5ZWFyDQpgYGB7cn0NCmdncGxvdChkYXRhLCBhZXMoeCA9IHJlbGVhc2VfeWVhcikpICsNCiAgZ2VvbV9oaXN0b2dyYW0oYmlucyA9IDEwKSArDQogIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KG4gPSAxMCkpICsNCiAgbGFicyh4ID0gIlJlbGVhc2UgWWVhciIsIHkgPSAiTnVtYmVyIG9mIG1vdmllcyIsIHRpdGxlID0gIkRpc3RyaWJ1dGlvbiBvZiByZWxlYXNlIHllYXIiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGANCiMjIyBOdW1iZXIgb2YgZmFjZXMNCmBgYHtyfQ0KZ2dwbG90KGRhdGEsIGFlcyh4ID0gbmJfZmFjZXMpKSArIA0KICBnZW9tX2hpc3RvZ3JhbSgpICsNCiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSkgKw0KICBsYWJzKHggPSAiTnVtYmVyIG9mIGZhY2VzIiwgeSA9ICJOdW1iZXIgb2YgbW92aWVzIiwgdGl0bGUgPSAiRGlzdHJpYnV0aW9uIG9mIG51bWJlciBvZiBmYWNlcyBpbiB0aGUgbW92aWUgcG9zdGVyIikgKw0KICB0aGVtZV9wdWJyKCkgKw0KICB0aGVtZV9sb3goKQ0KYGBgDQoNCiMjIEJpdmFyaWF0ZSBkaXN0cmlidXRpb25zDQoNCiMjIyBNb3ZpZSBidWRnZXRzIH4gSU1EYiBTY29yZQ0KYGBge3J9DQpnZ3Bsb3QoZGF0YSwgYWVzKHggPSBtb3ZpZV9idWRnZXQsIHkgPSBpbWRiX3Njb3JlKSkgKw0KICBnZW9tX3BvaW50KCkgKw0KICBzY2FsZV94X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpLCBsYWJlbHMgPSBsYWJlbF9kb2xsYXIoc2NhbGVfY3V0ID0gY3V0X3Nob3J0X3NjYWxlKCkpKSArDQogIGxhYnMoeCA9ICJNb3ZpZSBidWRnZXQiLCB5ID0gIklNRGIgU2NvcmUiLCB0aXRsZSA9ICJNb3ZpZSBidWRnZXQgYW5kIElNRGIgc2NvcmUiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGA=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIk1HU0MgNjYxIC0gTWlkdGVybSBQcm9qZWN0IC0gRmluYWwgUmVwb3J0Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg==</div>
 
 
 
@@ -1982,7 +1802,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("movie_rating_prediction.Rmd");
+  window.initializeSourceEmbed("final_report.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
