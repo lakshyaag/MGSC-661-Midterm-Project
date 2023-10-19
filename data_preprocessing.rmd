@@ -4,23 +4,181 @@ output: html_notebook
 ---
 
 
-# Importing Data
+### Importing Data
 ```{r}
 data <- read.csv('./IMDB_data_Fall_2023.csv')
 attach(data)
+View(data)
 ```
 
-# Checking the unique values in the language column
+### Data Cleaning
+
+#### Removing Unnecessary features like movie title, movie id, imdb link, actor1, actor2, actor3, genre
 ```{r}
-unique(data$maturity_rating)
+install.packages("dplyr")
+library(dplyr)
+
+columns_to_remove <- c("movie_title","movie_id" ,"imdb_link", "actor1", "actor2", "actor3", "genres","release_year")
+
+data <- select(data, -one_of(columns_to_remove))
+
 ```
 
-#Finding all rows having Tom Hardy in the actor 1 column and printing the actor 1 star meter column
+#### Checking for Multicollinearity in the quantitative features
 ```{r}
-data$actor1_star_meter[data$actor1 == "Meryl Streep"]
+install.packages("psych")
+library(psych)
+
+#Getting all the headers of quantitative features
+quantitative_features <- names(data)[sapply(data, is.numeric)]
+
+#Using VIF to check for multicollinearity
+
+#Feeding basic lm model with all the quantitative features
+lm_model <- lm(imdb_score ~ ., data = data[,quantitative_features])
+
+#Using VIF function to check for multicollinearity
+vif(lm_model)
+
 ```
 
-#finding all rows with black and white movies and print the release year column
+#### Could not find any multicollinearity in the quantitative features
+
+### Moving on the the categorical features
+
+#### Getting the top 20 keywords in the plot_keywords feature based on their count
 ```{r}
-data$release_year[data$colour_film == "Black and White"]
+# Step 1: Split the strings
+keywords_list <- strsplit(as.character(data$plot_keywords), split = "\\|")
+
+# Step 2: Unlist the resulting list
+keywords_vector <- unlist(keywords_list)
+
+# Step 3: Tabulate the keywords
+keywords_table <- table(keywords_vector)
+
+# Step 4: Sort the tabulation in descending order
+sorted_keywords <- sort(keywords_table, decreasing = TRUE)
+
+# Select the top 20 keywords
+top_20_keywords <- head(sorted_keywords, 20)
+
+# Print the top 20 keywords along with their counts
+#Stroring the top 20 keywords in a vector
+top_20_keywords <- names(top_20_keywords)
+
+```
+
+#### Now we would create 20 binary features , one for each keyword where value would be 1 if that keyword is there in the plot_keywords and 0 otherwise
+```{r}
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+# Creating a  Function to check for keyword presence
+check_keyword <- function(keyword_column, keyword) {
+  return(sapply(keyword_column, function(x) {
+    keyword %in% unlist(str_split(x, pattern = "\\|"))
+  }))
+}
+
+# Create binary columns for each of the top 20 keywords
+for (keyword in top_20_keywords) {
+    col_name <- paste("Plot contains", keyword)
+    data[[col_name]] <- as.integer(check_keyword(data$plot_keywords, keyword))
+}
+```
+
+
+#### Removing the plot_keywords feature
+```{r}
+data <- select(data, -one_of("plot_keywords"))
+```
+
+#### Now moving to the other categorical columns, let's check the unique value count in each of them
+```{r}
+#Getting all the headers of categorical features
+categorical_features <- names(data)[sapply(data, is.character)]
+
+#Getting the unique value count in each of the categorical features
+for (feature in categorical_features) {
+  print(paste(feature, ":", length(unique(data[[feature]]))))
+}
+
+```
+
+#### Let's also check te top 10 values of these columns with counts
+```{r}
+for (feature in categorical_features) {
+  print(paste("Feature:", feature))
+  feat_table <- sort(table(data[[feature]]),decreasing = TRUE)
+  print(head(feat_table, n = 10))
+}
+```
+
+#### 90% observations have the same language so we can remove this feature
+#### 70% observations have the same country so we can remove this feature
+#### Director has a lot of unique values so we can remove this feature
+
+```{r}
+data <- select(data, -one_of("language","country","director"))
+```
+
+#### For the other columns like cinematographer,production_company and distributor, we can create binary features for the top 20 values in each of them
+```{r}
+#Creating a function which gets the top 20 values in a column
+get_top_20 <- function(column) {
+  # Step 1: Tabulate the column
+  column_table <- table(column)
+  
+  # Step 2: Sort the tabulation in descending order
+  sorted_column <- sort(column_table, decreasing = TRUE)
+  
+  # Step 3: Select the top 20 values
+  top_20 <- head(sorted_column, 20)
+  
+  # Step 4: Return the top 20 values
+  return(names(top_20))
+}
+
+top_20_cinematographers <- get_top_20(data$cinematographer)
+top_20_production_companies <- get_top_20(data$production_company)
+top_20_distributors <- get_top_20(data$distributor)
+
+```
+
+#### Now we would create 20 binary features for each of the top 20 values in each of the columns
+```{r}
+# Creating a function to check for value presence
+check_value <- function(value_column, value) {
+  return(sapply(value_column, function(x) {
+    value %in% x
+  }))
+}
+
+# Create binary columns for each of the top 20 values in each of the columns
+for (value in top_20_cinematographers) {
+  col_name <- paste("Cinematographer is", value)
+  data[[col_name]] <- as.integer(check_value(data$cinematographer, value))
+}
+
+for (value in top_20_production_companies) {
+  col_name <- paste("Production Company is", value)
+  data[[col_name]] <- as.integer(check_value(data$production_company, value))
+}
+
+for (value in top_20_distributors) {
+  col_name <- paste("Distributor is", value)
+  data[[col_name]] <- as.integer(check_value(data$distributor, value))
+}
+```
+
+#### Removing the cinematographer,production_company and distributor columns
+```{r}
+data <- select(data, -one_of("cinematographer","production_company","distributor"))
+```
+
+#### Printing the data
+```{r}
+View(data)
 ```
