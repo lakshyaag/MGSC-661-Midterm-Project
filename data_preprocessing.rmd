@@ -8,7 +8,7 @@ output: html_notebook
 ```{r}
 data <- read.csv('./IMDB_data_Fall_2023.csv')
 attach(data)
-View(data)
+#View(data)
 ```
 
 ### Data Cleaning
@@ -28,6 +28,7 @@ data <- select(data, -one_of(columns_to_remove))
 ```{r}
 install.packages("psych")
 library(psych)
+library(car)
 
 #Getting all the headers of quantitative features
 quantitative_features <- names(data)[sapply(data, is.numeric)]
@@ -48,7 +49,6 @@ vif(lm_model)
 
 #### Getting the top 20 keywords in the plot_keywords feature based on their count
 ```{r}
-<<<<<<< HEAD
 # Step 1: Split the strings
 keywords_list <- strsplit(as.character(data$plot_keywords), split = "\\|")
 
@@ -100,6 +100,9 @@ data <- select(data, -one_of("plot_keywords"))
 ```{r}
 #Getting all the headers of categorical features
 categorical_features <- names(data)[sapply(data, is.character)]
+
+#adding aspect_ratio to categorical features
+categorical_features <- c(categorical_features,"aspect_ratio")
 
 #Getting the unique value count in each of the categorical features
 for (feature in categorical_features) {
@@ -179,7 +182,14 @@ for (value in top_20_distributors) {
 data <- select(data, -one_of("cinematographer","production_company","distributor"))
 ```
 
-#### Printing the data
+#### Converting remaining categorical features to factors
 ```{r}
-View(data)
+data$release_month = as.factor(data$release_month)
+data$maturity_rating = as.factor(data$maturity_rating)
+data$aspect_ratio = as.factor(data$aspect_ratio)
+data$colour_film = as.factor(data$colour_film)
+```
+#### Writing the cleaned data to a csv file
+```{r}
+write.csv(data, file = "IMDB_data_Fall_2023_cleaned.csv", row.names = FALSE)
 ```
