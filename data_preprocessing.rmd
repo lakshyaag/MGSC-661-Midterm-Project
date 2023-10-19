@@ -48,6 +48,7 @@ vif(lm_model)
 
 #### Getting the top 20 keywords in the plot_keywords feature based on their count
 ```{r}
+<<<<<<< HEAD
 # Step 1: Split the strings
 keywords_list <- strsplit(as.character(data$plot_keywords), split = "\\|")
 
