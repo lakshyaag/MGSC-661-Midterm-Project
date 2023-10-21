@@ -1,0 +1,1096 @@
+```{r}
+require(visreg)
+require(glue)
+require(car)
+require(lmtest)
+require(splines)
+require(psych)
+require(stargazer)
+require(plm)
+require(ggplot2)
+require(ggtext)
+require(ggpubr)
+require(ggrepel)
+require(ggthemes)
+require(scales)
+require(caTools)
+require(methods)
+require(boot)
+require(tidyverse)
+library(gridExtra)
+
+windowsFonts(Helvetica = "Product Sans")
+
+theme_lox <- function() {
+  theme(
+    panel.grid.major.x = element_line(linewidth = 0.3, colour = "#cbcbcb"),
+    panel.grid.major.y = element_line(linewidth = 0.3, colour = "#cbcbcb"),
+    plot.title = element_markdown(
+      family = "Helvetica",
+      size = 22,
+      face = "bold",
+      color = "#222222"
+    ),
+    plot.subtitle = element_text(
+      family = "Helvetica",
+      size = 16,
+      margin = margin(2, 0, 2, 0)
+    ),
+    plot.caption = element_text(family = "Helvetica", face = "bold"),
+    axis.text = element_text(
+      family = "Helvetica",
+      size = 12,
+      color = "#222222"
+    ),
+    axis.title = element_text(
+      family = "Helvetica",
+      size = 14,
+      color = "#222222"
+    ),
+    legend.text = element_text(family = "Helvetica", size = 12),
+    legend.title = element_text(
+      family = "Helvetica",
+      size = 14,
+      face = "bold"
+    ),
+    legend.position = "right",
+    strip.text = element_text(
+      family = "Helvetica",
+      size = 12,
+      hjust = 0.5
+    )
+  )
+}
+```
+
+```{r}
+data <- read.csv("./IMDB_data_Fall_2023_cleaned.csv")
+attach(data)
+
+data$release_month = as.factor(data$release_month)
+data$maturity_rating = as.factor(data$maturity_rating)
+data$aspect_ratio = as.factor(data$aspect_ratio)
+data$colour_film = as.factor(data$colour_film)
+```
+We will first focus on non-categorical variables
+First lets try simple regressions for movie_budget, duration, maturity_rating, nb_news_articles, actor1_star_meter, actor2_star_meter, actor3_star_meter, and movie_meter_IMDBpro
+```{r}
+# Simple linear regression for movie_budget
+model_budget <- lm(imdb_score ~ movie_budget, data=data)
+summary(model_budget)
+
+# Simple linear regression for duration
+model_duration <- lm(imdb_score ~ duration, data=data)
+summary(model_duration)
+
+# Simple linear regression for nb_news_articles
+model_news_articles <- lm(imdb_score ~ nb_news_articles, data=data)
+summary(model_news_articles)
+
+# Simple linear regression for actor1_star_meter
+model_actor1 <- lm(imdb_score ~ actor1_star_meter, data=data)
+summary(model_actor1)
+
+# Simple linear regression for actor2_star_meter
+model_actor2 <- lm(imdb_score ~ actor2_star_meter, data=data)
+summary(model_actor2)
+
+# Simple linear regression for actor3_star_meter
+model_actor3 <- lm(imdb_score ~ actor3_star_meter, data=data)
+summary(model_actor3)
+
+# Simple linear regression for movie_meter_IMDBpro
+model_movie_meter <- lm(imdb_score ~ movie_meter_IMDBpro, data=data)
+summary(model_movie_meter)
+
+```
+We notice that the actor star meter may not be a good predictor, lets keep it for now
+Lets try a multivariate regression with all of them again 
+```{r}
+model_multivariate <- lm(imdb_score ~ movie_budget + duration + nb_news_articles + actor1_star_meter 
+                         + actor2_star_meter + actor3_star_meter + movie_meter_IMDBpro, data=data)
+summary(model_multivariate)
+```
+```{r}
+ggplot(data, aes(x = actor1_star_meter, y = imdb_score)) +
+  geom_point() +
+  scale_x_continuous(breaks = scales::breaks_pretty(), labels = scales::label_number()) +
+  labs(x = "Actor 1 Star Meter", y = "IMDb Score", title = "Actor 1 Star Meter and IMDb score") +
+  theme_pubr() +
+  theme_lox()
+
+```
+Lets try again with only actors < 100000
+```{r}
+filtered_data <- data[data$actor1_star_meter <= 100000, ]
+ggplot(filtered_data, aes(x = actor1_star_meter, y = imdb_score)) +
+  geom_point() +
+  scale_x_continuous(breaks = scales::breaks_pretty(), labels = scales::label_number()) +
+  labs(x = "Actor 1 Star Meter", y = "IMDb Score", title = "Actor 1 Star Meter and IMDb score") +
+  theme_pubr() +
+  theme_lox()
+```
+Even when removing the top actors, this score does not seem like a usefull predictor.
+I will not use the actor scores.
+```{r}
+model_multivariate <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro, data=data)
+summary(model_multivariate)
+```
+This is far from satisfying but we can keep those 4 continuous predictors for now.
+We see similar R values and a higher F-statistic so I feel safe removing actorscore
+
+Lets have a look at the impact of the release date on the score. 
+Simple linear regression for month and year:
+
+```{r}
+model_day <- lm(imdb_score ~ release_day, data=data)
+summary(model_day)
+
+model_month <- lm(imdb_score ~ release_month, data=data)
+summary(model_month)
+
+model_time_multi <- lm(imdb_score ~ release_day + release_month , data=data)
+summary(model_time_multi)
+```
+It is pretty obvious that the day would not have an impact.
+We notice that seasonal releases have very much an impact (Fall, Christmas, June especially)
+For year older movies tend to have different ratings, this predictor might not be as relevant for predicting new movie scores.
+
+We keep only the significant high-impact months 
+```{r}
+data <- data %>%
+  mutate(release_monthNov_dummy = ifelse(release_month == "Nov", 1, 0),
+         release_monthDec_dummy = ifelse(release_month == "Dec", 1, 0))
+
+```
+Lets add those as predictors to our previous multivariate model (I added June at first but removed it as it was not significant)
+```{r}
+model_multivariate2 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + release_monthNov_dummy + release_monthDec_dummy, data=data)
+summary(model_multivariate2)
+```
+Lets keep it as such for now.
+
+Lets have a look at other dummy variables to see which one to use as predictors.
+Lets do simple descriptive statistics for all dummy other variables.
+
+```{r}
+ggplot(data, aes(x=movie_budget, y=imdb_score)) + geom_point() + geom_smooth(method='lm')
+ggplot(data, aes(x=duration, y=imdb_score)) + geom_point() + geom_smooth(method='lm')
+ggplot(data, aes(x=nb_news_articles, y=imdb_score)) + geom_point() + geom_smooth(method='lm')
+ggplot(data, aes(x=movie_meter_IMDBpro, y=imdb_score)) + geom_point() + geom_smooth(method='lm')
+```
+A linear model might not be the most useful
+```{r}
+par(mfrow=c(1,2))
+plot(model_multivariate2, which=1:2)
+```
+Lets have a look at dummy variables first before moving to a non-linear model. (those not removed after preprocessing)
+```{r}
+column_names <- names(data)
+print(column_names)
+```
+```{r}
+# Bar plot for maturity_rating
+ggplot(data, aes(x = maturity_rating)) +
+  geom_bar() +
+  labs(title = "Distribution of Maturity Rating", x = "Maturity Rating", y = "Count") +
+  theme_minimal()
+
+# Bar plot for aspect_ratio
+ggplot(data, aes(x = aspect_ratio)) +
+  geom_bar() +
+  labs(title = "Distribution of Aspect Ratio", x = "Aspect Ratio", y = "Count") +
+  theme_minimal()
+
+# Bar plot for colour_film
+ggplot(data, aes(x = colour_film)) +
+  geom_bar() +
+  labs(title = "Distribution of Colour Film", x = "Colour Film", y = "Count") +
+  theme_minimal()
+```
+```{r}
+# Simple linear regression for nb_faces
+model_nb_faces <- lm(imdb_score ~ nb_faces, data=data)
+summary(model_nb_faces)
+```
+
+```{r}
+# Simple linear regression for maturity_rating
+model_maturity_rating <- lm(imdb_score ~ maturity_rating, data=data)
+summary(model_maturity_rating)
+
+# Simple linear regression for aspect_ratio
+model_aspect_ratio <- lm(imdb_score ~ aspect_ratio, data=data)
+summary(model_aspect_ratio)
+
+# Simple linear regression for colour_film
+model_colour_film <- lm(imdb_score ~ colour_film, data=data)
+summary(model_colour_film)
+
+```
+```{r}
+# Create dummy variable for aspect_ratio1.78
+data$aspect_ratio1.78_dummy <- as.numeric(data$aspect_ratio == "1.78")
+
+# Create dummy variables for the maturity ratings
+maturity_ratings <- c("PG", "PG-13", "R", "TV-14", "TV-G", "G")
+for (rating in maturity_ratings) {
+  data[paste0("maturity_rating_", rating, "_dummy")] <- as.numeric(data$maturity_rating == rating)
+}
+
+names(data)[names(data) == "aspect_ratio1.78_dummy"] <- "dummy_aspect_ratio_1_78"
+names(data)[names(data) == "maturity_rating_PG_dummy"] <- "dummy_maturity_rating_PG"
+names(data)[names(data) == "maturity_rating_PG-13_dummy"] <- "dummy_maturity_rating_PG13"
+names(data)[names(data) == "maturity_rating_R_dummy"] <- "dummy_maturity_rating_R"
+names(data)[names(data) == "maturity_rating_TV-14_dummy"] <- "dummy_maturity_rating_TV14"
+names(data)[names(data) == "maturity_rating_TV-G_dummy"] <- "dummy_maturity_rating_TVG"
+names(data)[names(data) == "maturity_rating_G_dummy"] <- "dummy_maturity_rating_G"
+```
+
+```{r}
+model_multivariate3 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + release_monthNov_dummy + release_monthDec_dummy
+                         + dummy_aspect_ratio_1_78 + 
+            dummy_maturity_rating_PG + 
+            dummy_maturity_rating_PG13 + 
+            dummy_maturity_rating_R + 
+            dummy_maturity_rating_TV14 + 
+            dummy_maturity_rating_TVG + colour_film +
+            dummy_maturity_rating_G, data=data)
+summary(model_multivariate3)
+```
+```{r}
+model_multivariate3 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + release_monthNov_dummy + release_monthDec_dummy
+                         + dummy_aspect_ratio_1_78 + 
+            dummy_maturity_rating_TV14 + 
+            dummy_maturity_rating_TVG + colour_film + nb_faces, data=data)
+summary(model_multivariate3)
+```
+Looking at movie genres now:
+```{r}
+
+model_genre <- lm(imdb_score ~ action + adventure + scifi + thriller + musical + 
+                  romance + western + sport + horror + drama + war + animation + crime, 
+                  data = data)
+
+summary(model_genre)
+
+```
+Adding the significant genre in our model:
+```{r}
+model_multivariate4 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + release_monthNov_dummy + release_monthDec_dummy
+                         + dummy_aspect_ratio_1_78 + 
+            dummy_maturity_rating_TV14 + 
+            dummy_maturity_rating_TVG + colour_film + nb_faces +
+              action + thriller + musical + romance + western + horror + drama + war + crime, data=data)
+summary(model_multivariate4)
+```
+```{r}
+model_multivariate4 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + release_monthNov_dummy + release_monthDec_dummy
+                         + dummy_aspect_ratio_1_78 + 
+            dummy_maturity_rating_TV14 + 
+            dummy_maturity_rating_TVG + colour_film + nb_faces +
+              action + musical + western + drama + crime, data=data)
+summary(model_multivariate4)
+```
+```{r}
+# Create the fall_release_dummy variable
+data$fall_release_dummy <- ifelse(data$release_monthNov_dummy == 1 | 
+                                  data$release_monthDec_dummy == 1, 1, 0)
+
+# Run the updated regression model with the new dummy variable
+model_multivariate5 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + fall_release_dummy +
+                         dummy_aspect_ratio_1_78 + 
+                         dummy_maturity_rating_TV14 + 
+                         dummy_maturity_rating_TVG + colour_film + nb_faces +
+                         action + musical + western + drama + crime, data=data)
+
+# Display the summary of the updated regression model
+summary(model_multivariate5)
+```
+Lets look at plot points:
+```{r}
+model_plot_points <- lm(imdb_score ~ Plot.contains.murder + 
+                                        Plot.contains.love + 
+                                        Plot.contains.friend + 
+                                        Plot.contains.death + 
+                                        Plot.contains.high.school + 
+                                        Plot.contains.police + 
+                                        Plot.contains.new.york.city + 
+                                        Plot.contains.boy + 
+                                        Plot.contains.drugs + 
+                                        Plot.contains.school + 
+                                        Plot.contains.detective + 
+                                        Plot.contains.fbi + 
+                                        Plot.contains.friendship + 
+                                        Plot.contains.money + 
+                                        Plot.contains.wedding + 
+                                        Plot.contains.serial.killer + 
+                                        Plot.contains.alien + 
+                                        Plot.contains.cult.film + 
+                                        Plot.contains.marriage + 
+                                        Plot.contains.party,
+                         data = data)
+
+summary(model_plot_points)
+```
+None of them are significant execpt cult film which is not going to help us predict the score of a new film as this description is only given to film that had the time to become cult films.
+
+Lets look at the top 20 cinematographers:
+```{r}
+model_cinematographers <- lm(imdb_score ~ Cinematographer.is.multiple + 
+                                                Cinematographer.is.Roger.Deakins + 
+                                                Cinematographer.is.Mark.Irwin + 
+                                                Cinematographer.is.John.Bailey + 
+                                                Cinematographer.is.Andrew.Dunn + 
+                                                Cinematographer.is.Jack.N..Green + 
+                                                Cinematographer.is.Matthew.F..Leonetti + 
+                                                Cinematographer.is.Robert.Elswit + 
+                                                Cinematographer.is.Dean.Cundey + 
+                                                Cinematographer.is.Don.Burgess + 
+                                                Cinematographer.is.Julio.Macat + 
+                                                Cinematographer.is.Matthew.Libatique + 
+                                                Cinematographer.is.Peter.Deming + 
+                                                Cinematographer.is.Phedon.Papamichael + 
+                                                Cinematographer.is.Robert.D..Yeoman + 
+                                                Cinematographer.is.Darius.Khondji + 
+                                                Cinematographer.is.Declan.Quinn + 
+                                                Cinematographer.is.Dick.Pope + 
+                                                Cinematographer.is.Elliot.Davis + 
+                                                Cinematographer.is.John.R..Leonetti,
+                             data = data)
+
+summary(model_cinematographers)
+```
+Cinematographer doesnt give us much as such I wont use them
+Lets try production company:
+```{r}
+model_production_companies <- lm(imdb_score ~ Production.Company.is.Universal.Pictures + 
+                                                    Production.Company.is.Paramount.Pictures + 
+                                                    Production.Company.is.Columbia.Pictures.Corporation + 
+                                                    Production.Company.is.Warner.Bros. + 
+                                                    Production.Company.is.New.Line.Cinema + 
+                                                    Production.Company.is.Twentieth.Century.Fox + 
+                                                    Production.Company.is.Metro.Goldwyn.Mayer..MGM. + 
+                                                    Production.Company.is.Touchstone.Pictures + 
+                                                    Production.Company.is.DreamWorks + 
+                                                    Production.Company.is.Miramax + 
+                                                    Production.Company.is.Lionsgate + 
+                                                    Production.Company.is.Fox.Searchlight.Pictures + 
+                                                    Production.Company.is.Walt.Disney.Pictures + 
+                                                    Production.Company.is.Dimension.Films + 
+                                                    Production.Company.is.Focus.Features + 
+                                                    Production.Company.is.Fox.2000.Pictures + 
+                                                    Production.Company.is.Summit.Entertainment + 
+                                                    Production.Company.is.Screen.Gems + 
+                                                    Production.Company.is.Castle.Rock.Entertainment + 
+                                                    Production.Company.is.Revolution.Studios,
+                                 data = data)
+
+summary(model_production_companies)
+
+```
+I risk overfitting my model if I add only specific production companies.
+Maybe distributors is better
+```{r}
+model_distributors <- lm(imdb_score ~ Distributor.is.Warner.Bros. + 
+                                            Distributor.is.Universal.Pictures + 
+                                            Distributor.is.Paramount.Pictures + 
+                                            Distributor.is.Twentieth.Century.Fox + 
+                                            Distributor.is.Columbia.Pictures.Corporation + 
+                                            Distributor.is.New.Line.Cinema + 
+                                            Distributor.is.Buena.Vista.Pictures + 
+                                            Distributor.is.Miramax + 
+                                            Distributor.is.United.Artists + 
+                                            Distributor.is.Metro.Goldwyn.Mayer..MGM. + 
+                                            Distributor.is.Fox.Searchlight.Pictures + 
+                                            Distributor.is.Lionsgate + 
+                                            Distributor.is.Summit.Entertainment + 
+                                            Distributor.is.Focus.Features + 
+                                            Distributor.is.Screen.Gems + 
+                                            Distributor.is.Lions.Gate.Films + 
+                                            Distributor.is.Creative.Artists.Agency..CAA. + 
+                                            Distributor.is.Dimension.Films + 
+                                            Distributor.is.TriStar.Pictures + 
+                                            Distributor.is.The.Weinstein.Company,
+                         data = data)
+
+summary(model_distributors)
+
+```
+Same as before risk of overfitting. (also none of the movies we are going to predict are from the significant distributors execpt miramax...)
+Just for fun all predictors:
+```{r}
+model_all_predictors <- lm(imdb_score ~ movie_budget + release_day + 
+                                            release_month + duration + maturity_rating + 
+                                            aspect_ratio + nb_news_articles + actor1_star_meter + 
+                                            actor2_star_meter + actor3_star_meter + colour_film + 
+                                            nb_faces + action + adventure + scifi + thriller + 
+                                            musical + romance + western + sport + horror + drama + 
+                                            war + animation + crime + movie_meter_IMDBpro + 
+                                            Plot.contains.murder + Plot.contains.love + 
+                                            Plot.contains.friend + Plot.contains.death + 
+                                            Plot.contains.high.school + Plot.contains.police + 
+                                            Plot.contains.new.york.city + Plot.contains.boy + 
+                                            Plot.contains.drugs + Plot.contains.school + 
+                                            Plot.contains.detective + Plot.contains.fbi + 
+                                            Plot.contains.friendship + Plot.contains.money + 
+                                            Plot.contains.wedding + Plot.contains.serial.killer + 
+                                            Plot.contains.alien + Plot.contains.cult.film + 
+                                            Plot.contains.marriage + Plot.contains.party + 
+                                            Cinematographer.is.multiple + Cinematographer.is.Roger.Deakins + 
+                                            Cinematographer.is.Mark.Irwin + Cinematographer.is.John.Bailey + 
+                                            Cinematographer.is.Andrew.Dunn + Cinematographer.is.Jack.N..Green + 
+                                            Cinematographer.is.Matthew.F..Leonetti + Cinematographer.is.Robert.Elswit + 
+                                            Cinematographer.is.Dean.Cundey + Cinematographer.is.Don.Burgess + 
+                                            Cinematographer.is.Julio.Macat + Cinematographer.is.Matthew.Libatique + 
+                                            Cinematographer.is.Peter.Deming + Cinematographer.is.Phedon.Papamichael + 
+                                            Cinematographer.is.Robert.D..Yeoman + Cinematographer.is.Darius.Khondji + 
+                                            Cinematographer.is.Declan.Quinn + Cinematographer.is.Dick.Pope + 
+                                            Cinematographer.is.Elliot.Davis + Cinematographer.is.John.R..Leonetti + 
+                                            Production.Company.is.Universal.Pictures + Production.Company.is.Paramount.Pictures + 
+                                            Production.Company.is.Columbia.Pictures.Corporation + Production.Company.is.Warner.Bros. + 
+                                            Production.Company.is.New.Line.Cinema + Production.Company.is.Twentieth.Century.Fox + 
+                                            Production.Company.is.Metro.Goldwyn.Mayer..MGM. + Production.Company.is.Touchstone.Pictures + 
+                                            Production.Company.is.DreamWorks + Production.Company.is.Miramax + 
+                                            Production.Company.is.Lionsgate + Production.Company.is.Fox.Searchlight.Pictures + 
+                                            Production.Company.is.Walt.Disney.Pictures + Production.Company.is.Dimension.Films + 
+                                            Production.Company.is.Focus.Features + Production.Company.is.Fox.2000.Pictures + 
+                                            Production.Company.is.Summit.Entertainment + Production.Company.is.Screen.Gems + 
+                                            Production.Company.is.Castle.Rock.Entertainment + Production.Company.is.Revolution.Studios + 
+                                            Distributor.is.Warner.Bros. + Distributor.is.Universal.Pictures + 
+                                            Distributor.is.Paramount.Pictures + Distributor.is.Twentieth.Century.Fox + 
+                                            Distributor.is.Columbia.Pictures.Corporation + Distributor.is.New.Line.Cinema + 
+                                            Distributor.is.Buena.Vista.Pictures + Distributor.is.Miramax + 
+                                            Distributor.is.United.Artists + Distributor.is.Metro.Goldwyn.Mayer..MGM. + 
+                                            Distributor.is.Fox.Searchlight.Pictures + Distributor.is.Lionsgate + 
+                                            Distributor.is.Summit.Entertainment + Distributor.is.Focus.Features + 
+                                            Distributor.is.Screen.Gems + Distributor.is.Lions.Gate.Films + 
+                                            Distributor.is.Creative.Artists.Agency..CAA. + Distributor.is.Dimension.Films + 
+                                            Distributor.is.TriStar.Pictures + Distributor.is.The.Weinstein.Company + 
+                                            release_monthNov_dummy + release_monthDec_dummy, 
+                           data = data)
+
+summary(model_all_predictors)
+
+```
+Experimenting with interaction terms:
+```{r}
+model_multivariate6 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + fall_release_dummy +
+                         dummy_aspect_ratio_1_78 + 
+                         dummy_maturity_rating_TV14 + 
+                         dummy_maturity_rating_TVG + colour_film + nb_faces +
+                         action + musical + western + drama + crime +
+                         movie_budget:duration + duration:action
+                         + duration:drama + colour_film:drama,
+                         data=data)
+summary(model_multivariate6)
+
+
+model_multivariate5 <- lm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + fall_release_dummy +
+                         dummy_maturity_rating_TV14 + 
+                         dummy_maturity_rating_TVG + nb_faces +
+                         action + musical + western + drama + crime, data=data)
+
+# Display the summary of the updated regression model
+summary(model_multivariate5)
+set.seed(123)
+cv_results <- cv.glm(data, model_multivariate5, K = 20)
+mse <- cv_results$delta[1]
+print(mse)
+```
+######### Next: non-linear models ###########
+
+MOVIE BUDGET
+```{r}
+# Assuming the data is named 'data' and the predictors and response are the same
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ poly(movie_budget, degree), data=data)
+}
+
+# Base plot with scatter
+base_plot <- ggplot(data, aes(x=movie_budget, y=imdb_score)) + 
+  geom_point(color = "grey", alpha = 0.5)
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(movie_budget = data$movie_budget, 
+                          predicted = predict(models[[degree]], data))
+  
+  plots[[degree]] <- base_plot + 
+    geom_line(data = pred_data, aes(x = movie_budget, y = predicted, color = as.character(degree))) +
+    scale_color_identity(guide = 'none') + 
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display plots in batches of 5 each
+library(gridExtra)
+
+# Display the first 5 plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+
+# Display the next 5 plots
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ poly(movie_budget, d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+
+
+
+```
+Let's say we use degree 6 for movie budget
+Lets see if we can improve with quartile splines (as there is no clear spline to place)
+
+```{r}
+quartiles <- quantile(data$movie_budget, c(0.25, 0.5, 0.75))
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ bs(movie_budget, knots=quartiles, degree=degree), data=data)
+}
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(movie_budget = data$movie_budget, 
+                          predicted = predict(models[[degree]], data))
+
+  # Create a base plot for each degree to avoid overwriting
+  base_plot_degree <- ggplot(data, aes(x=movie_budget, y=imdb_score)) + 
+    geom_point(color = "grey", alpha = 0.5) +
+    geom_vline(aes(xintercept = quartiles[1]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[2]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[3]), linetype = "dashed", color = "red")
+
+  plots[[degree]] <- base_plot_degree + 
+    geom_line(data = pred_data, aes(x = movie_budget, y = predicted)) +
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display the plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ bs(movie_budget, knots=quartiles, degree=d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+```
+We will not use spline for budget (for now)
+
+DURATION
+
+```{r}
+# Assuming the data is named 'data' and the predictors and response are the same
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ poly(duration, degree), data=data)
+}
+
+# Base plot with scatter
+base_plot <- ggplot(data, aes(x=duration, y=imdb_score)) + 
+  geom_point(color = "grey", alpha = 0.5)
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(duration = data$duration, 
+                          predicted = predict(models[[degree]], data))
+  
+  plots[[degree]] <- base_plot + 
+    geom_line(data = pred_data, aes(x = duration, y = predicted, color = as.character(degree))) +
+    scale_color_identity(guide = 'none') + 
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display plots in batches of 5 each
+library(gridExtra)
+
+# Display the first 5 plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+
+# Display the next 5 plots
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ poly(duration, d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+
+
+```
+Degree 5 looks good lets add a splines
+
+```{r}
+quartiles <- quantile(data$duration, c(0.25, 0.5, 0.75))
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ bs(duration, knots=quartiles, degree=degree), data=data)
+}
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(duration = data$duration, 
+                          predicted = predict(models[[degree]], data))
+
+  # Create a base plot for each degree to avoid overwriting
+  base_plot_degree <- ggplot(data, aes(x=duration, y=imdb_score)) + 
+    geom_point(color = "grey", alpha = 0.5) +
+    geom_vline(aes(xintercept = quartiles[1]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[2]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[3]), linetype = "dashed", color = "red")
+
+  plots[[degree]] <- base_plot_degree + 
+    geom_line(data = pred_data, aes(x = duration, y = predicted)) +
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display the plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ bs(duration, knots=quartiles, degree=d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+
+```
+We degree 4 with quartile splines is better maybe we can place them somewhere better
+```{r}
+# Define knots for splines
+knots <- c(80, 130)
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ bs(duration, knots=knots, degree=degree), data=data)
+}
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(duration = data$duration, 
+                          predicted = predict(models[[degree]], data))
+
+  # Create a base plot for each degree to avoid overwriting
+  base_plot_degree <- ggplot(data, aes(x=duration, y=imdb_score)) + 
+    geom_point(color = "grey", alpha = 0.5) +
+    geom_vline(aes(xintercept = knots[1]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = knots[2]), linetype = "dashed", color = "red")
+
+  plots[[degree]] <- base_plot_degree + 
+    geom_line(data = pred_data, aes(x = duration, y = predicted)) +
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display the plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ bs(duration, knots=knots, degree=d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+```
+Quartiles are still the best
+
+
+nb_news_articles
+```{r}
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ poly(nb_news_articles, degree,raw=TRUE), data=data)
+}
+
+# Base plot with scatter
+base_plot <- ggplot(data, aes(x=nb_news_articles, y=imdb_score)) + 
+  geom_point(color = "grey", alpha = 0.5)
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(nb_news_articles = data$nb_news_articles, 
+                          predicted = predict(models[[degree]], data))
+  
+  plots[[degree]] <- base_plot + 
+    geom_line(data = pred_data, aes(x = nb_news_articles, y = predicted, color = as.character(degree))) +
+    scale_color_identity(guide = 'none') + 
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display plots in batches of 5 each
+library(gridExtra)
+
+# Display the first 5 plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+
+# Display the next 5 plots
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ poly(nb_news_articles, d, raw=TRUE), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+```
+```{r}
+# Quartiles for splines
+quartiles <- quantile(data$nb_news_articles, c(0.25, 0.5, 0.75))
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ bs(nb_news_articles, knots=quartiles, degree=degree), data=data)
+}
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(nb_news_articles = data$nb_news_articles, 
+                          predicted = predict(models[[degree]], data))
+
+  # Create a base plot for each degree to avoid overwriting
+  base_plot_degree <- ggplot(data, aes(x=nb_news_articles, y=imdb_score)) + 
+    geom_point(color = "grey", alpha = 0.5) +
+    geom_vline(aes(xintercept = quartiles[1]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[2]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[3]), linetype = "dashed", color = "red")
+
+  plots[[degree]] <- base_plot_degree + 
+    geom_line(data = pred_data, aes(x = nb_news_articles, y = predicted)) +
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display the plots
+library(gridExtra)
+grid.arrange(grobs = plots[1:5], ncol=3)
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ bs(nb_news_articles, knots=quartiles, degree=d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+
+
+```
+Quartile spline with d=4 is pretty good
+movie_meter_IMDBpro
+```{r}
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ poly(movie_meter_IMDBpro, degree), data=data)
+}
+
+# Base plot with scatter
+base_plot <- ggplot(data, aes(x=movie_meter_IMDBpro, y=imdb_score)) + 
+  geom_point(color = "grey", alpha = 0.5)
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(movie_meter_IMDBpro = data$movie_meter_IMDBpro, 
+                          predicted = predict(models[[degree]], data))
+  
+  plots[[degree]] <- base_plot + 
+    geom_line(data = pred_data, aes(x = movie_meter_IMDBpro, y = predicted, color = as.character(degree))) +
+    scale_color_identity(guide = 'none') + 
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display plots in batches of 5 each
+library(gridExtra)
+
+# Display the first 5 plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+
+# Display the next 5 plots
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ poly(movie_meter_IMDBpro, d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+
+```
+Pretty good results with d=5
+Now with quartile splines
+```{r}
+quartiles <- quantile(data$movie_meter_IMDBpro, c(0.25, 0.5, 0.75))
+
+# Create polynomial models up to degree 10 using glm and store them in a list
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ bs(movie_meter_IMDBpro, knots=quartiles, degree=degree), data=data)
+}
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(movie_meter_IMDBpro = data$movie_meter_IMDBpro, 
+                          predicted = predict(models[[degree]], data))
+
+  # Create a base plot for each degree to avoid overwriting
+  base_plot_degree <- ggplot(data, aes(x=movie_meter_IMDBpro, y=imdb_score)) + 
+    geom_point(color = "grey", alpha = 0.5) +
+    geom_vline(aes(xintercept = quartiles[1]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[2]), linetype = "dashed", color = "red") +
+    geom_vline(aes(xintercept = quartiles[3]), linetype = "dashed", color = "red")
+
+  plots[[degree]] <- base_plot_degree + 
+    geom_line(data = pred_data, aes(x = movie_meter_IMDBpro, y = predicted)) +
+    ggtitle(paste("Degree:", degree))
+}
+
+# Display the plots
+library(gridExtra)
+grid.arrange(grobs = plots[1:5], ncol=3)
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ bs(movie_meter_IMDBpro, knots=quartiles, degree=d), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+```
+Lets use quantile splines with d =2
+Lets try with all splines at the same time 
+
+```{r}
+spline_model_1 <- glm(imdb_score ~
+                               poly(movie_budget,6) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 2),
+                               data = data)
+summary(spline_model_1)
+set.seed(123)
+cv_results <- cv.glm(data, spline_model_1, K = 20)
+mse <- cv_results$delta[1]
+print(mse)
+```
+
+
+
+Checking for the best model:
+```{r}
+degrees = c(1, 2, 3, 4, 5, 6)
+best_combination = NULL
+min_mse = 9999999
+
+for (a in degrees) {
+  for (b in degrees) {
+    for (c in degrees) {
+      for (d in degrees) {
+        
+          spline_model <- glm(imdb_score ~
+                               poly(movie_budget,a) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = b) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = c) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = d),
+                               data = data) # Assuming your data is named 'data'
+
+          set.seed(123)  
+          cv_results <- cv.glm(data, spline_model, K = 20)
+          mse_instance <- cv_results$delta[1]
+       
+          if (mse_instance < min_mse) {
+            min_mse <- mse_instance
+            best_combination <- c(a, b, c, d)
+          }
+        }
+      }
+    }
+  }
+
+cat("Best Combination:", best_combination, "\n")
+cat("Lowest MSE:", min_mse, "\n")
+
+```
+Best Combination: 2 4 1 1 1 
+Lowest MSE: 0.7730379 
+
+Using this combination:
+```{r}
+spline_model_1 <- glm(imdb_score ~
+                               poly(movie_budget,2) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1),
+                               data = data)
+summary(spline_model_1)
+set.seed(123)
+cv_results <- cv.glm(data, spline_model_1, K = 20)
+mse <- cv_results$delta[1]
+print(mse)
+
+r_squared <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
+print(r_squared)
+```
+mse = 0.7730379
+Rsquare = 0.3748198
+
+Compared to our best linear model:
+0.9062449
+0.3010482
+```{r}
+model_multivariate5 <- glm(imdb_score ~ movie_budget + duration + nb_news_articles 
+                         + movie_meter_IMDBpro + fall_release_dummy +
+                         dummy_maturity_rating_TV14 + 
+                         dummy_maturity_rating_TVG + nb_faces +
+                         action + musical + western + drama + crime, data=data)
+
+# Display the summary of the updated regression model
+summary(model_multivariate5)
+set.seed(123)
+cv_results <- cv.glm(data, model_multivariate5, K = 20)
+mse <- cv_results$delta[1]
+print(mse)
+
+r_squared <- 1 - (model_multivariate5$deviance / model_multivariate5$null.deviance)
+print(r_squared)
+```
+This means that adding the categorical variables with help us improve this model.
+
