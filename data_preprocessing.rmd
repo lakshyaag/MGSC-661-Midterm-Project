@@ -6,7 +6,7 @@ output: html_notebook
 
 ### Importing Data
 ```{r}
-data <- read.csv('./IMDB_data_Fall_2023.csv')
+data <- read.csv('IMDB_data_Fall_2023.csv')
 attach(data)
 #View(data)
 ```
@@ -18,7 +18,7 @@ attach(data)
 install.packages("dplyr")
 library(dplyr)
 
-columns_to_remove <- c("movie_title","movie_id" ,"imdb_link", "actor1", "actor2", "actor3", "genres","release_year")
+columns_to_remove <- c("movie_title","movie_id" ,"imdb_link", "actor1", "actor2", "actor3", "genres","release_year","release_day")
 
 data <- select(data, -one_of(columns_to_remove))
 
@@ -65,7 +65,7 @@ sorted_keywords <- sort(keywords_table, decreasing = TRUE)
 top_20_keywords <- head(sorted_keywords, 20)
 
 # Print the top 20 keywords along with their counts
-#Stroring the top 20 keywords in a vector
+#Storing the top 20 keywords in a vector
 top_20_keywords <- names(top_20_keywords)
 
 ```
@@ -111,7 +111,7 @@ for (feature in categorical_features) {
 
 ```
 
-#### Let's also check te top 10 values of these columns with counts
+#### Let's also check the top 10 values of these columns with counts
 ```{r}
 for (feature in categorical_features) {
   print(paste("Feature:", feature))
@@ -145,9 +145,9 @@ get_top_20 <- function(column) {
   return(names(top_20))
 }
 
-top_20_cinematographers <- get_top_20(data$cinematographer)
+#top_20_cinematographers <- get_top_20(data$cinematographer)
 top_20_production_companies <- get_top_20(data$production_company)
-top_20_distributors <- get_top_20(data$distributor)
+#top_20_distributors <- get_top_20(data$distributor)
 
 ```
 
@@ -161,25 +161,31 @@ check_value <- function(value_column, value) {
 }
 
 # Create binary columns for each of the top 20 values in each of the columns
-for (value in top_20_cinematographers) {
-  col_name <- paste("Cinematographer is", value)
-  data[[col_name]] <- as.integer(check_value(data$cinematographer, value))
-}
 
 for (value in top_20_production_companies) {
   col_name <- paste("Production Company is", value)
   data[[col_name]] <- as.integer(check_value(data$production_company, value))
-}
-
-for (value in top_20_distributors) {
-  col_name <- paste("Distributor is", value)
-  data[[col_name]] <- as.integer(check_value(data$distributor, value))
 }
 ```
 
 #### Removing the cinematographer,production_company and distributor columns
 ```{r}
 data <- select(data, -one_of("cinematographer","production_company","distributor"))
+```
+
+#### Filtering rows in data on basis of values of aspect_ratio column
+```{r}
+data <- data[data$aspect_ratio %in% c("1.85 ", "2.35"),]
+```
+
+#### checking count of each unique value in maturity_rating column
+```{r}
+table(data$maturity_rating)
+```
+
+### Filtering rows in data on basis of values of maturity_rating column
+```{r}
+data <- data[data$maturity_rating %in% c("PG", "PG-13", "R"),]
 ```
 
 #### Converting remaining categorical features to factors
@@ -193,3 +199,212 @@ data$colour_film = as.factor(data$colour_film)
 ```{r}
 write.csv(data, file = "IMDB_data_Fall_2023_cleaned.csv", row.names = FALSE)
 ```
+### detaching data
+```{r}
+detach(data)
+```
+
+#### Building linear regression model with all the features
+```{r}
+data <- read.csv('IMDB_data_Fall_2023_cleaned.csv')
+attach(data)
+lm_model <- lm(imdb_score ~ ., data = data)
+summary(lm_model)
+# r squared value is 0.3779
+```
+
+#### Residual plot for the model
+```{r}
+residualPlot(lm_model)
+```
+
+
+### The model is highly non linear, running bonferonni test to remove the outliers
+```{r}
+outlierTest(lm_model)
+```
+
+#### our model contains outliers
+#### Removing outliers rows from the dataset
+```{r}
+#storing indentified outlier rows in a variable
+outlier_rows <- c(786, 213, 494, 113, 893, 260)
+#removing the outlier rows from our dataset
+data <- data[-c(outlier_rows), ]
+```
+
+#### re-running the regression with new dataset after removing outliers
+```{r}
+lm_model <- lm(imdb_score ~ ., data = data)
+summary(lm_model)
+## r squared = 0.4005
+```
+
+#### residual plot for the model
+```{r}
+residualPlot(lm_model)
+```
+
+### The model is highly non linear, running bonferonni test to remove the outliers
+```{r}
+outlierTest(lm_model)
+```
+
+#### Removing outliers rows from the dataset
+```{r}
+#storing indentified outlier rows in a variable
+outlier_rows <- c(6, 108, 515)
+#removing the outlier rows from our dataset
+data <- data[-c(outlier_rows), ]
+```
+
+#### re-running the regression with new dataset after removing outliers
+```{r}
+lm_model <- lm(imdb_score ~ ., data = data)
+summary(lm_model)
+## r squared = 0.4214
+```
+
+#### checking for collinearity in the model
+```{r}
+vif(lm_model)
+```
+
+#### Heteroskeasticity test
+```{r}
+ncvTest(lm_model)
+```
+
+####our model contains Heteroskeasticity
+```{r}
+install.packages("lmtest")
+library(lmtest)
+install.packages("plm")
+require(plm)
+coeftest(lm_model, vcov=vcovHC(lm_model, type="HC1"))
+```
+
+### checking MSE of model
+```{r}
+lm_model <- lm(imdb_score ~ ., data = data)
+summary(lm_model)
+predicted_values <- predict(lm_model, data)
+actual_values <- data$imdb_score
+mse <- mean((predicted_values - actual_values)^2)
+mse ## = 0.532
+```
+
+#### Validation test
+```{r}
+require(caTools)
+require(splines)
+require(methods)
+library(ggplot2)
+#doing train test split of the data randomly
+#set.seed(123)
+sample=sample.split(data$imdb_score, SplitRatio=0.6)
+train_set = subset(data, sample ==TRUE)
+test_set = subset(data, sample == FALSE)
+
+#fitting model onto train set
+reg1 = lm(imdb_score~., data = train_set)
+
+#calculate MSE in test data
+predict1 = predict(reg1, newdata = test_set)
+actual1 = test_set$imdb_score
+mse1 = mean((predict1 - actual1)^2)
+mse1
+#mse = 0.60
+```
+
+#### K- fold test
+```{r}
+require(boot)
+# Define function to calculate the cross-validated MSE
+mse_calc <- function(n) {
+  # Train the linear regression model using k-fold cross-validation
+  reg2 <- glm(imdb_score ~ ., data = data)
+  mse2 <- cv.glm(data, reg2, K=n)$delta[1]
+
+  return(mse2)
+}
+
+# Initialize a vector to store MSE values
+mse_values <- rep(NA,4)
+
+# Check mse for values of k from 1 to 5
+for (n in 2:5) {
+  mse_values[n-1] <- mse_calc(n)
+}
+
+# Print the cross-validated MSE values
+min(mse_values) 
+#mse = 0.677
+```
+
+#### Running multiple polynomial regression models to check for the best fit
+```{r}
+
+numeric_predictors <- c("movie_budget", "duration", 
+                        "nb_news_articles", "actor1_star_meter", "actor2_star_meter", "actor3_star_meter", 
+                       "nb_news_articles", "movie_meter_IMDBpro")
+                       
+
+
+min_mses <- rep(Inf, length(numeric_predictors))
+best_degrees <- numeric(length(numeric_predictors))
+best_terms <- character(length(numeric_predictors))
+
+# Determine the best degree for each predictor individually
+for (j in 1:length(numeric_predictors)) {
+  predictor <- numeric_predictors[j]
+  
+  for (degree in 1:5) {
+    # Generate formula for the current degree
+    terms_list <- sapply(1:degree, function(d) {
+      if (d == 1) return(predictor)
+      else return(paste("poly(", predictor, ",",d, ")", sep=""))
+    })
+    formula_str <- paste("imdb_score ~", paste(terms_list, collapse = " + "))
+    formula <- as.formula(formula_str)
+    print(formula)
+    # Fit the model
+    model <- lm(formula, data=data)
+    
+    # Predict values
+    predicted_values <- predict(model, data)
+    
+    # Calculate MSE
+    mse <- mean((predicted_values - data$imdb_score)^2)
+    
+    # Update best degree if current MSE is lower
+    if (mse < min_mses[j]) {
+      min_mses[j] <- mse
+      best_degrees[j] <- degree
+      best_terms[j] <- paste(terms_list, collapse = " + ")
+      print(best_terms[j])
+    }
+  }
+}
+
+
+print(best_terms)
+# Construct formula for the final model using best degrees
+final_formula_str <- paste("imdb_score ~", paste(best_terms, collapse = " + "))
+final_formula <- as.formula(final_formula_str)
+
+# Fit the final model
+final_model <- lm(final_formula, data=data)
+
+# Predict values for the final model
+final_predicted_values <- predict(final_model, data)
+
+# Calculate final MSE
+final_mse <- mean((final_predicted_values - data$imdb_score)^2)
+
+print(paste("Final Formula:", final_formula_str))
+print(paste("Final MSE:", final_mse))
+
+```
+
+
