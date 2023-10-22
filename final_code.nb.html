@@ -11,7 +11,7 @@
 
 
 
-<title>MGSC 661 - Midterm Project - Final Report</title>
+<title>MGSC 661 - Midterm Project</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1746,16 +1746,575 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">MGSC 661 - Midterm Project - Final
-Report</h1>
+<h1 class="title toc-ignore">MGSC 661 - Midterm Project</h1>
 
 </div>
 
 
 <!-- rnb-text-begin -->
+<div id="importing-data" class="section level1">
+<h1>Importing data</h1>
 <!-- rnb-text-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGhlbWVfbG94IDwtIGZ1bmN0aW9uKCkge1xuICB0aGVtZShcbiAgICBwYW5lbC5ncmlkLm1ham9yLnggPSBlbGVtZW50X2xpbmUobGluZXdpZHRoID0gMC4zLCBjb2xvdXIgPSBcIiNjYmNiY2JcIiksXG4gICAgcGFuZWwuZ3JpZC5tYWpvci55ID0gZWxlbWVudF9saW5lKGxpbmV3aWR0aCA9IDAuMywgY29sb3VyID0gXCIjY2JjYmNiXCIpLFxuICAgIHBsb3QudGl0bGUgPSBlbGVtZW50X21hcmtkb3duKFxuICAgICAgZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIixcbiAgICAgIHNpemUgPSAyMixcbiAgICAgIGZhY2UgPSBcImJvbGRcIixcbiAgICAgIGNvbG9yID0gXCIjMjIyMjIyXCJcbiAgICApLFxuICAgIHBsb3Quc3VidGl0bGUgPSBlbGVtZW50X3RleHQoXG4gICAgICBmYW1pbHkgPSBcIkhlbHZldGljYVwiLFxuICAgICAgc2l6ZSA9IDE2LFxuICAgICAgbWFyZ2luID0gbWFyZ2luKDIsIDAsIDIsIDApXG4gICAgKSxcbiAgICBwbG90LmNhcHRpb24gPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIiwgZmFjZSA9IFwiYm9sZFwiKSxcbiAgICBheGlzLnRleHQgPSBlbGVtZW50X3RleHQoXG4gICAgICBmYW1pbHkgPSBcIkhlbHZldGljYVwiLFxuICAgICAgc2l6ZSA9IDEyLFxuICAgICAgY29sb3IgPSBcIiMyMjIyMjJcIlxuICAgICksXG4gICAgYXhpcy50aXRsZSA9IGVsZW1lbnRfdGV4dChcbiAgICAgIGZhbWlseSA9IFwiSGVsdmV0aWNhXCIsXG4gICAgICBzaXplID0gMTQsXG4gICAgICBjb2xvciA9IFwiIzIyMjIyMlwiXG4gICAgKSxcbiAgICBsZWdlbmQudGV4dCA9IGVsZW1lbnRfdGV4dChmYW1pbHkgPSBcIkhlbHZldGljYVwiLCBzaXplID0gMTIpLFxuICAgIGxlZ2VuZC50aXRsZSA9IGVsZW1lbnRfdGV4dChcbiAgICAgIGZhbWlseSA9IFwiSGVsdmV0aWNhXCIsXG4gICAgICBzaXplID0gMTQsXG4gICAgICBmYWNlID0gXCJib2xkXCJcbiAgICApLFxuICAgIGxlZ2VuZC5wb3NpdGlvbiA9IFwicmlnaHRcIixcbiAgICBzdHJpcC50ZXh0ID0gZWxlbWVudF90ZXh0KFxuICAgICAgZmFtaWx5ID0gXCJIZWx2ZXRpY2FcIixcbiAgICAgIHNpemUgPSAxMixcbiAgICAgIGhqdXN0ID0gMC41XG4gICAgKVxuICApXG59XG5gYGAifQ== -->
+<pre class="r"><code>theme_lox &lt;- function() {
+  theme(
+    panel.grid.major.x = element_line(linewidth = 0.3, colour = &quot;#cbcbcb&quot;),
+    panel.grid.major.y = element_line(linewidth = 0.3, colour = &quot;#cbcbcb&quot;),
+    plot.title = element_markdown(
+      family = &quot;Helvetica&quot;,
+      size = 22,
+      face = &quot;bold&quot;,
+      color = &quot;#222222&quot;
+    ),
+    plot.subtitle = element_text(
+      family = &quot;Helvetica&quot;,
+      size = 16,
+      margin = margin(2, 0, 2, 0)
+    ),
+    plot.caption = element_text(family = &quot;Helvetica&quot;, face = &quot;bold&quot;),
+    axis.text = element_text(
+      family = &quot;Helvetica&quot;,
+      size = 12,
+      color = &quot;#222222&quot;
+    ),
+    axis.title = element_text(
+      family = &quot;Helvetica&quot;,
+      size = 14,
+      color = &quot;#222222&quot;
+    ),
+    legend.text = element_text(family = &quot;Helvetica&quot;, size = 12),
+    legend.title = element_text(
+      family = &quot;Helvetica&quot;,
+      size = 14,
+      face = &quot;bold&quot;
+    ),
+    legend.position = &quot;right&quot;,
+    strip.text = element_text(
+      family = &quot;Helvetica&quot;,
+      size = 12,
+      hjust = 0.5
+    )
+  )
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSA8LSByZWFkLmNzdihcIi4vSU1EQl9kYXRhX0ZhbGxfMjAyMy5jc3ZcIilcbmF0dGFjaChkYXRhKVxuYGBgIn0= -->
+<pre class="r"><code>data &lt;- read.csv(&quot;./IMDB_data_Fall_2023.csv&quot;)
+attach(data)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIGZvbGxvd2luZyBvYmplY3RzIGFyZSBtYXNrZWQgZnJvbSBkYXRhIChwb3MgPSAzKTpcblxuICAgIGFjdGlvbiwgYWN0b3IxLCBhY3RvcjFfc3Rhcl9tZXRlciwgYWN0b3IyLCBhY3RvcjJfc3Rhcl9tZXRlciwgYWN0b3IzLFxuICAgIGFjdG9yM19zdGFyX21ldGVyLCBhZHZlbnR1cmUsIGFuaW1hdGlvbiwgYXNwZWN0X3JhdGlvLCBjaW5lbWF0b2dyYXBoZXIsXG4gICAgY29sb3VyX2ZpbG0sIGNvdW50cnksIGNyaW1lLCBkaXJlY3RvciwgZGlzdHJpYnV0b3IsIGRyYW1hLCBkdXJhdGlvbiwgZ2VucmVzLFxuICAgIGhvcnJvciwgaW1kYl9saW5rLCBpbWRiX3Njb3JlLCBsYW5ndWFnZSwgbWF0dXJpdHlfcmF0aW5nLCBtb3ZpZV9idWRnZXQsXG4gICAgbW92aWVfaWQsIG1vdmllX21ldGVyX0lNREJwcm8sIG1vdmllX3RpdGxlLCBtdXNpY2FsLCBuYl9mYWNlcyxcbiAgICBuYl9uZXdzX2FydGljbGVzLCBwbG90X2tleXdvcmRzLCBwcm9kdWN0aW9uX2NvbXBhbnksIHJlbGVhc2VfZGF5LFxuICAgIHJlbGVhc2VfbW9udGgsIHJlbGVhc2VfeWVhciwgcm9tYW5jZSwgc2NpZmksIHNwb3J0LCB0aHJpbGxlciwgd2FyLCB3ZXN0ZXJuXG4ifQ== -->
+<pre><code>The following objects are masked from data (pos = 3):
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIk1HU0MgNjYxIC0gTWlkdGVybSBQcm9qZWN0IC0gRmluYWwgUmVwb3J0Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg==</div>
+    action, actor1, actor1_star_meter, actor2, actor2_star_meter, actor3,
+    actor3_star_meter, adventure, animation, aspect_ratio, cinematographer,
+    colour_film, country, crime, director, distributor, drama, duration, genres,
+    horror, imdb_link, imdb_score, language, maturity_rating, movie_budget,
+    movie_id, movie_meter_IMDBpro, movie_title, musical, nb_faces,
+    nb_news_articles, plot_keywords, production_company, release_day,
+    release_month, release_year, romance, scifi, sport, thriller, war, western</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="exploratory-data-analysis" class="section level1">
+<h1>Exploratory data analysis</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChkYXRhKVxuYGBgIn0= -->
+<pre class="r"><code>head(data)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NiwibmNvbCI6NDIsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGYgWzYgeCA0Ml0iXX19LCJyZGYiOiJINHNJQUFBQUFBQUFCclZYelc4Y1JSYnZzZVB2c1NkeElJSGRCVFVTRWxKUTdJenRHQVVKNGEvZ0pNVEVtakV5QjlDb3BydW11M0IzVmF1cU9wT0pHcEVqcDczdlh1QWZXTzE1dFplVlZscHBKVGl0MkJPQ00zOEVINy91NmVycGFTY1FETFNtWnJwZXZWZjE2bjM5M3JUMjNsdWZmMi9lc3F4SjY5eGt6WnFjd3FzMXRkM2V2WDNic3M1TllGS3p6bGx6NmU4RE1GM0V5eFdNOHhqVCtjSXoyN0VYSy8yNmZVOFJqOXE3SXVaNmtLOU50WWpMUkQ2cDd3cmkrUFl1a1pyS25MWjA1RlA3VUNoRmxXS0NteTF2S29kRTFPNUpFZHJiZ1VPMEpBL3p0Y1cyVDE5UnRvYmNBZUVwSWRQRnNsSmw2eGlOZEFPTVN4aVhLN3B1K0ZwSHI2K3U5dnY5RlJhNjNSVkhoS3VhNllDdWF0MWNYMXRiMjd5eCtxYWt2YzRiUGQ3Uk92MDBuMGIyMm5wemMyUHoraGxsYjBCNjdXeXlHK3ZOYTJ2TnM4bGVlKzFHczdsNXhuT3ZiOXpZZU14OTRkTFUzbHN2ckdmUDFoLy9rajUvM2ZyVDUrbnp4ZGJsZlA1aUwzdTJuaC9PalI5ckh6M1ltcmkwOUsvYWYvLzl5UHJ5MDBmV3cyV3IxcnhxbGZ5Y1J1dHorVG5HenhjcWZwNjhRMHdzVGQ1ejlHT29DTnFDR2hmVUF5SkhKODE4amZFL2pDOHh2c0w0SjhiL1M1b01NRUtNVHpEZXg0Z3dXRVdUbVp2Y0M1anlmOHRwNWE3dnRyZlAranErVTYyVnYwd2M3cHNFUHR5LzJseC8zT1FVai9IOHhORFRiMzZYZXpxZlYrbm10NkxEczJsQk9LYU1LNDB2VkpNd0l0eVVreGQyUlJDSFhVYnNRK2JvV0ZJRkJoa0pTZlNvZUN3ZkVrbkN0QW9WWFBuSzNGMXdLWTlvK3JPc2wrK1NFNnA4SWFsOW02TmM4ZXdFRW95OFAvc0JEUFkyM3IrQkxWSTZ3ZmhiNVRiemQ0VFBjWjBnTUJzdkhUREhKelN3ajBRUU1LUHo0cEV2UXFMR2EyUDlYa0R0SFNFNWRYRnd2dUdlNEhhYlVZOGFTbjJidXdQN0xlYWNoRms1SEN2Tk94VEN1Sm05QzdOUjJTWGFNZEcwdUIzMGNMdGpJVndpWGFQZHJrODRaOXl6ajRpT1E4UDY5a0FTdTAxZHI0OWpDbGFvcisyYlJPays5bmpDQm9XNWFwTlEvdTh3MVJzSTVCOUE2dzNmeC9TdEgxQTVDT3kybHBSR09XMmh4UUk2c05zaDA0WHFMYWhoN3d2K2tBVFU0TUtGQTBDTmduWDJ5SDNLRVJNbTY4OGZBajVTZ1FOblh3aS9LQUdYdGdQNmdIQVhWOXVSMURtaFhETFhveU9WSjFZQkp2RHc4ajh3L2RheUx2NEgxNUFWbFJmdnhBSGlzU1ZnWG0yY1hOK2pYV3g3RERzVTNtd01XZXdXZXdVQlVGaDg4UjJpaWZJSlhJL2NOb0g2bHFTdWZUemlxdDhsTVRac2tWRFJRVW5ER294NTNiTCtBTEJlUVhWNkZ0b3VmVnpSY0FwSkkrU3ZuMVIyM1VQbUVKTzBPMHg0a2tUK0lNbklTYnRrLzRYVHBNWXRJYVdReVpFdldSQVVKaXB0c3l0WlNKUHlHVXNvQmRRZEpDMGtDbmRLYmtMcmtuWXBwNSt5dXJlNlJNR2tDSThvSUlPRVlRZWxZeEVyVzlJZ3kyM2xzeWlKcUNzaW44R2ppYUtPcERyUmxQSzByWEZKN1BtajNGeDEwbDRtNlFtaHV5UUlpaGQ3U1BlWjU5dks4WVVJRWxscWdUYWh4Z2tkaW94ZWN5SHp6ZEh0T0xxOFJ5Nzk2aW1Scm5pUWZFajdBQVVjMCsyeVpJQ1lzUlhTSWhkNW1lVGRVMEt6bGdvM0QxSC9FcVlDaEg0U3lUUmxEQy95eDR1Wm9va1VJc3pZOGlzbzRUaFVKcnJQeWczWGs1N2ZZNzMyTSt0UHUzL3RGOHJYck5PeDliVDYxYXh4K1ZwbC9Xbk8veVhybGYwYm4xbldTd0NtaG92TXVvc3loaFNlKzdNMW5oZU5iVmN5d2dXcWFlQ0dSVzFjU0dGbUo1WWUybkpUZ3Rxb1dvS2o2NmFzUUtnOXdtMlVKcVVWTGFCc1I4WU90ZHN4a0t5QTA4VjlTVDE3SDhISk9LMldrcCtFL09VV3ZRL1FUek1VdUJBamxRcUZIdk4zNHBsOVh5aHQzMEppMHlxa1B4bnM1L2NrSmVHeGtDZXE4cWRuaXBNUWJFTjlyeGpqaE9JK281MnNGYzVKczBNU00vVjZMbTJZT3dCSWc1YnpHVUU1YUNpTStrT1JiZ3pNS1VvbGloRkZvZXE0eE54LzBaQkMxQVVEZ0hWREhGQmlyajdyeG1OdDBDd1MzSXRSdWt6MzZLUlhsMmJmQnZJN2xrd1BPcWtVTjgxd25haUlPam9qbXFLMWdMb0FCTzNHdW9DRTg3emI0YlN2T2pBK2M0TENrck11QTVTTytLWkpPakgvS0M0TVp4MmxpZXlFZE9TMklkdmFHTnZhazlqV3g5aldUN010T01DcldIWjZMREFkekxRSGRCOXBDZTE3eEJsRlp4UUkzVG1oZzc2UXJpb2ROckxtSEhIUlZhUkJZeUpET2F6SHpJWjZITWhtd2xneHAyamFabVNPV2ZtMEQreEJTMW5zVkVMR2FUOURSclBrbGdCd3NsLzRlbzV3RnBhZFBlV2tlSmxQTGc0akt6Tko1L2JCM2s0a2pTc2JEdklQa2tPWUxmUmRCb2NiWi9mdE9IbjZqU2ZDbkJUOUZaTU1hWUdaZURRc050UFZqSEVDb2t6R0dPSzhpeVpucFlmTHBMajlmVVZrUmtRWkFHUFRpM2xwS3d0bkxkZThOYXFsNWNWR3pGT3QzS3VPSC9PVHF4c1Yxc1g4ZDdyMGZtVjQvTVFQbFRJMFRia0g2NWdnaXBBNjdnb0FraHZmVEFXa1c3VGRTekJJWm84eGxubFExWW9XZXRTd0l4Z05KYnU2OWYyUGpZay81SFVSQUFBPSJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["movie_title"],"name":[1],"type":["chr"],"align":["left"]},{"label":["movie_id"],"name":[2],"type":["int"],"align":["right"]},{"label":["imdb_link"],"name":[3],"type":["chr"],"align":["left"]},{"label":["imdb_score"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["movie_budget"],"name":[5],"type":["int"],"align":["right"]},{"label":["release_day"],"name":[6],"type":["int"],"align":["right"]},{"label":["release_month"],"name":[7],"type":["chr"],"align":["left"]},{"label":["release_year"],"name":[8],"type":["int"],"align":["right"]},{"label":["duration"],"name":[9],"type":["int"],"align":["right"]},{"label":["language"],"name":[10],"type":["chr"],"align":["left"]},{"label":["country"],"name":[11],"type":["chr"],"align":["left"]},{"label":["maturity_rating"],"name":[12],"type":["chr"],"align":["left"]},{"label":["aspect_ratio"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["distributor"],"name":[14],"type":["chr"],"align":["left"]},{"label":["nb_news_articles"],"name":[15],"type":["int"],"align":["right"]},{"label":["director"],"name":[16],"type":["chr"],"align":["left"]},{"label":["actor1"],"name":[17],"type":["chr"],"align":["left"]},{"label":["actor1_star_meter"],"name":[18],"type":["int"],"align":["right"]},{"label":["actor2"],"name":[19],"type":["chr"],"align":["left"]},{"label":["actor2_star_meter"],"name":[20],"type":["int"],"align":["right"]},{"label":["actor3"],"name":[21],"type":["chr"],"align":["left"]},{"label":["actor3_star_meter"],"name":[22],"type":["int"],"align":["right"]},{"label":["colour_film"],"name":[23],"type":["chr"],"align":["left"]},{"label":["genres"],"name":[24],"type":["chr"],"align":["left"]},{"label":["nb_faces"],"name":[25],"type":["int"],"align":["right"]},{"label":["plot_keywords"],"name":[26],"type":["chr"],"align":["left"]},{"label":["action"],"name":[27],"type":["int"],"align":["right"]},{"label":["adventure"],"name":[28],"type":["int"],"align":["right"]},{"label":["scifi"],"name":[29],"type":["int"],"align":["right"]},{"label":["thriller"],"name":[30],"type":["int"],"align":["right"]},{"label":["musical"],"name":[31],"type":["int"],"align":["right"]},{"label":["romance"],"name":[32],"type":["int"],"align":["right"]},{"label":["western"],"name":[33],"type":["int"],"align":["right"]},{"label":["sport"],"name":[34],"type":["int"],"align":["right"]},{"label":["horror"],"name":[35],"type":["int"],"align":["right"]},{"label":["drama"],"name":[36],"type":["int"],"align":["right"]},{"label":["war"],"name":[37],"type":["int"],"align":["right"]},{"label":["animation"],"name":[38],"type":["int"],"align":["right"]},{"label":["crime"],"name":[39],"type":["int"],"align":["right"]},{"label":["movie_meter_IMDBpro"],"name":[40],"type":["int"],"align":["right"]},{"label":["cinematographer"],"name":[41],"type":["chr"],"align":["left"]},{"label":["production_company"],"name":[42],"type":["chr"],"align":["left"]}],"data":[{"1":"August: Osage County","2":"2","3":"http://www.imdb.com/title/tt1322269/?ref_=fn_tt_tt_1","4":"7.3","5":"25000000","6":"10","7":"Jan","8":"2014","9":"121","10":"English","11":"USA","12":"R","13":"2.35","14":"The Weinstein Company","15":"2141","16":"John Wells","17":"Benedict Cumberbatch","18":"259","19":"Meryl Streep","20":"559","21":"Julia Roberts","22":"513","23":"Color","24":"Drama","25":"3","26":"based on play|incestuous relationship|pedophilia|secret|teenage daughter","27":"0","28":"0","29":"0","30":"0","31":"0","32":"0","33":"0","34":"0","35":"0","36":"1","37":"0","38":"0","39":"0","40":"4000","41":"Adriano Goldman","42":"The Weinstein Company","_rn_":"1"},{"1":"Radio","2":"12","3":"http://www.imdb.com/title/tt0316465/?ref_=fn_tt_tt_1","4":"6.9","5":"35000000","6":"24","7":"Oct","8":"2003","9":"109","10":"English","11":"USA","12":"PG","13":"1.85","14":"Columbia Pictures Corporation","15":"331","16":"Michael Tollin","17":"Alfre Woodard","18":"2735","19":"Riley Smith","20":"3915","21":"Debra Winger","22":"1845","23":"Color","24":"Biography|Drama|Sport","25":"1","26":"coach|football|football coach|high school|radio","27":"0","28":"0","29":"0","30":"0","31":"0","32":"0","33":"0","34":"1","35":"0","36":"1","37":"0","38":"0","39":"0","40":"8556","41":"Don Burgess","42":"Revolution Studios","_rn_":"2"},{"1":"Coach Carter","2":"15","3":"http://www.imdb.com/title/tt0393162/?ref_=fn_tt_tt_1","4":"7.2","5":"30000000","6":"14","7":"Jan","8":"2005","9":"136","10":"English","11":"USA","12":"PG-13","13":"2.35","14":"Paramount Pictures","15":"223","16":"Thomas Carter","17":"Channing Tatum","18":"573","19":"Rick Gonzalez","20":"4793","21":"Robert Ri'chard","22":"6729","23":"Color","24":"Drama|Sport","25":"0","26":"basketball|basketball coach|coach|contract|high school","27":"0","28":"0","29":"0","30":"0","31":"0","32":"0","33":"0","34":"1","35":"0","36":"1","37":"0","38":"0","39":"0","40":"3940","41":"Sharone Meir","42":"Coach Carter","_rn_":"3"},{"1":"The Possession","2":"20","3":"http://www.imdb.com/title/tt0431021/?ref_=fn_tt_tt_1","4":"5.9","5":"14000000","6":"20","7":"Aug","8":"2012","9":"92","10":"English","11":"USA","12":"PG-13","13":"2.35","14":"Lionsgate","15":"620","16":"Ole Bornedal","17":"Kyra Sedgwick","18":"2047","19":"Madison Davenport","20":"1769","21":"Natasha Calis","22":"11963","23":"Color","24":"Horror|Thriller","25":"0","26":"basketball coach|box|jewish|rabbi|yard sale","27":"0","28":"0","29":"0","30":"1","31":"0","32":"0","33":"0","34":"0","35":"1","36":"0","37":"0","38":"0","39":"0","40":"5452","41":"Dan Laustsen","42":"Ghost House Pictures","_rn_":"4"},{"1":"Escape from Alcatraz","2":"22","3":"http://www.imdb.com/title/tt0079116/?ref_=fn_tt_tt_1","4":"7.6","5":"8000000","6":"22","7":"Jun","8":"1979","9":"112","10":"English","11":"USA","12":"PG","13":"1.85","14":"Paramount Pictures","15":"97","16":"Don Siegel","17":"Clint Eastwood","18":"102","19":"Patrick McGoohan","20":"5062","21":"Fred Ward","22":"5451","23":"Color","24":"Biography|Crime|Drama","25":"0","26":"alcatraz|escape|inmate|island|prison","27":"0","28":"0","29":"0","30":"0","31":"0","32":"0","33":"0","34":"0","35":"0","36":"1","37":"0","38":"0","39":"1","40":"4722","41":"Bruce Surtees","42":"Paramount Pictures","_rn_":"5"},{"1":"She's the Man","2":"23","3":"http://www.imdb.com/title/tt0454945/?ref_=fn_tt_tt_1","4":"6.4","5":"20000000","6":"17","7":"Mar","8":"2006","9":"105","10":"English","11":"USA","12":"PG-13","13":"1.85","14":"Lakeshore International","15":"173","16":"Andy Fickman","17":"Channing Tatum","18":"573","19":"Alexandra Breckenridge","20":"370","21":"Laura Ramsey","22":"3711","23":"Color","24":"Comedy|Romance","25":"0","26":"disguise|roommate|school|soccer|twin","27":"0","28":"0","29":"0","30":"0","31":"0","32":"1","33":"0","34":"0","35":"0","36":"0","37":"0","38":"0","39":"0","40":"2446","41":"Greg Gardiner","42":"DreamWorks","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10],"total":[42]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShkYXRhKVxuYGBgIn0= -->
+<pre class="r"><code>summary(data)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiIG1vdmllX3RpdGxlICAgICAgICAgICBtb3ZpZV9pZCAgICAgIGltZGJfbGluayAgICAgICAgICAgaW1kYl9zY29yZSAgICAgbW92aWVfYnVkZ2V0ICAgICBcbiBMZW5ndGg6MTkzMCAgICAgICAgTWluLiAgIDogICAgMiAgIExlbmd0aDoxOTMwICAgICAgICBNaW4uICAgOjEuOTAwICAgTWluLiAgIDogIDU2MDAwMCAgXG4gQ2xhc3MgOmNoYXJhY3RlciAgIDFzdCBRdS46IDI1MjggICBDbGFzcyA6Y2hhcmFjdGVyICAgMXN0IFF1Ljo1LjkwMCAgIDFzdCBRdS46IDg3MjUwMDAgIFxuIE1vZGUgIDpjaGFyYWN0ZXIgICBNZWRpYW4gOiA1ODAyICAgTW9kZSAgOmNoYXJhY3RlciAgIE1lZGlhbiA6Ni42MDAgICBNZWRpYW4gOjE4MDAwMDAwICBcbiAgICAgICAgICAgICAgICAgICAgTWVhbiAgIDogNzA2NyAgICAgICAgICAgICAgICAgICAgICBNZWFuICAgOjYuNTEyICAgTWVhbiAgIDoyMDk3Mzc3NCAgXG4gICAgICAgICAgICAgICAgICAgIDNyZCBRdS46MTA2MDQgICAgICAgICAgICAgICAgICAgICAgM3JkIFF1Ljo3LjMwMCAgIDNyZCBRdS46MzAwMDAwMDAgIFxuICAgICAgICAgICAgICAgICAgICBNYXguICAgOjIxODM4ICAgICAgICAgICAgICAgICAgICAgIE1heC4gICA6OS4zMDAgICBNYXguICAgOjU1MDAwMDAwICBcbiAgcmVsZWFzZV9kYXkgICAgcmVsZWFzZV9tb250aCAgICAgICByZWxlYXNlX3llYXIgICAgIGR1cmF0aW9uICAgICAgIGxhbmd1YWdlICAgICAgICBcbiBNaW4uICAgOiAxLjAwICAgTGVuZ3RoOjE5MzAgICAgICAgIE1pbi4gICA6MTkzNiAgIE1pbi4gICA6IDM3LjAgICBMZW5ndGg6MTkzMCAgICAgICBcbiAxc3QgUXUuOiA5LjAwICAgQ2xhc3MgOmNoYXJhY3RlciAgIDFzdCBRdS46MTk5NyAgIDFzdCBRdS46IDk2LjAgICBDbGFzcyA6Y2hhcmFjdGVyICBcbiBNZWRpYW4gOjE3LjAwICAgTW9kZSAgOmNoYXJhY3RlciAgIE1lZGlhbiA6MjAwNCAgIE1lZGlhbiA6MTA2LjAgICBNb2RlICA6Y2hhcmFjdGVyICBcbiBNZWFuICAgOjE1Ljk1ICAgICAgICAgICAgICAgICAgICAgIE1lYW4gICA6MjAwMSAgIE1lYW4gICA6MTA5LjcgICAgICAgICAgICAgICAgICAgICBcbiAzcmQgUXUuOjIzLjAwICAgICAgICAgICAgICAgICAgICAgIDNyZCBRdS46MjAxMCAgIDNyZCBRdS46MTE4LjAgICAgICAgICAgICAgICAgICAgICBcbiBNYXguICAgOjMwLjAwICAgICAgICAgICAgICAgICAgICAgIE1heC4gICA6MjAxOCAgIE1heC4gICA6MzMwLjAgICAgICAgICAgICAgICAgICAgICBcbiAgIGNvdW50cnkgICAgICAgICAgbWF0dXJpdHlfcmF0aW5nICAgICBhc3BlY3RfcmF0aW8gICBkaXN0cmlidXRvciAgICAgICAgbmJfbmV3c19hcnRpY2xlcyBcbiBMZW5ndGg6MTkzMCAgICAgICAgTGVuZ3RoOjE5MzAgICAgICAgIE1pbi4gICA6MS4xODAgICBMZW5ndGg6MTkzMCAgICAgICAgTWluLiAgIDogICAgMC4wICBcbiBDbGFzcyA6Y2hhcmFjdGVyICAgQ2xhc3MgOmNoYXJhY3RlciAgIDFzdCBRdS46MS44NTAgICBDbGFzcyA6Y2hhcmFjdGVyICAgMXN0IFF1LjogICA3OC4wICBcbiBNb2RlICA6Y2hhcmFjdGVyICAgTW9kZSAgOmNoYXJhY3RlciAgIE1lZGlhbiA6Mi4zNTAgICBNb2RlICA6Y2hhcmFjdGVyICAgTWVkaWFuIDogIDI4Ni4wICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE1lYW4gICA6Mi4wOTYgICAgICAgICAgICAgICAgICAgICAgTWVhbiAgIDogIDc3MC42ICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDNyZCBRdS46Mi4zNTAgICAgICAgICAgICAgICAgICAgICAgM3JkIFF1LjogIDg0NS41ICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE1heC4gICA6Mi43NjAgICAgICAgICAgICAgICAgICAgICAgTWF4LiAgIDo2MDYyMC4wICBcbiAgIGRpcmVjdG9yICAgICAgICAgICAgYWN0b3IxICAgICAgICAgIGFjdG9yMV9zdGFyX21ldGVyICAgIGFjdG9yMiAgICAgICAgIFxuIExlbmd0aDoxOTMwICAgICAgICBMZW5ndGg6MTkzMCAgICAgICAgTWluLiAgIDogICAgICA5ICAgTGVuZ3RoOjE5MzAgICAgICAgXG4gQ2xhc3MgOmNoYXJhY3RlciAgIENsYXNzIDpjaGFyYWN0ZXIgICAxc3QgUXUuOiAgICA1MDUgICBDbGFzcyA6Y2hhcmFjdGVyICBcbiBNb2RlICA6Y2hhcmFjdGVyICAgTW9kZSAgOmNoYXJhY3RlciAgIE1lZGlhbiA6ICAgMTg4OCAgIE1vZGUgIDpjaGFyYWN0ZXIgIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTWVhbiAgIDogIDIxMTkwICAgICAgICAgICAgICAgICAgICAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAzcmQgUXUuOiAgIDQ2NjUgICAgICAgICAgICAgICAgICAgICBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE1heC4gICA6ODM0MjIwMSAgICAgICAgICAgICAgICAgICAgIFxuIGFjdG9yMl9zdGFyX21ldGVyICAgIGFjdG9yMyAgICAgICAgICBhY3RvcjNfc3Rhcl9tZXRlciBjb2xvdXJfZmlsbSAgICAgICBcbiBNaW4uICAgOiAgICAgIDMgICBMZW5ndGg6MTkzMCAgICAgICAgTWluLiAgIDogICAgICA4ICAgTGVuZ3RoOjE5MzAgICAgICAgXG4gMXN0IFF1LjogICAxODk1ICAgQ2xhc3MgOmNoYXJhY3RlciAgIDFzdCBRdS46ICAgMzA3NSAgIENsYXNzIDpjaGFyYWN0ZXIgIFxuIE1lZGlhbiA6ICAgMzk4NiAgIE1vZGUgIDpjaGFyYWN0ZXIgICBNZWRpYW4gOiAgIDU4NTYgICBNb2RlICA6Y2hhcmFjdGVyICBcbiBNZWFuICAgOiAgMTcxMTQgICAgICAgICAgICAgICAgICAgICAgTWVhbiAgIDogIDM1NDY5ICAgICAgICAgICAgICAgICAgICAgXG4gM3JkIFF1LjogICA3NjY3ICAgICAgICAgICAgICAgICAgICAgIDNyZCBRdS46ICAxMjI1MCAgICAgICAgICAgICAgICAgICAgIFxuIE1heC4gICA6NTUyOTQ2MSAgICAgICAgICAgICAgICAgICAgICBNYXguICAgOjYyOTI5ODIgICAgICAgICAgICAgICAgICAgICBcbiAgICBnZW5yZXMgICAgICAgICAgICAgbmJfZmFjZXMgICAgIHBsb3Rfa2V5d29yZHMgICAgICAgICAgYWN0aW9uICAgICAgICAgYWR2ZW50dXJlICAgICBcbiBMZW5ndGg6MTkzMCAgICAgICAgTWluLiAgIDogMC4wMCAgIExlbmd0aDoxOTMwICAgICAgICBNaW4uICAgOjAuMDAwMCAgIE1pbi4gICA6MC4wMDAwICBcbiBDbGFzcyA6Y2hhcmFjdGVyICAgMXN0IFF1LjogMC4wMCAgIENsYXNzIDpjaGFyYWN0ZXIgICAxc3QgUXUuOjAuMDAwMCAgIDFzdCBRdS46MC4wMDAwICBcbiBNb2RlICA6Y2hhcmFjdGVyICAgTWVkaWFuIDogMS4wMCAgIE1vZGUgIDpjaGFyYWN0ZXIgICBNZWRpYW4gOjAuMDAwMCAgIE1lZGlhbiA6MC4wMDAwICBcbiAgICAgICAgICAgICAgICAgICAgTWVhbiAgIDogMS40NCAgICAgICAgICAgICAgICAgICAgICBNZWFuICAgOjAuMjAwNSAgIE1lYW4gICA6MC4xMjY0ICBcbiAgICAgICAgICAgICAgICAgICAgM3JkIFF1LjogMi4wMCAgICAgICAgICAgICAgICAgICAgICAzcmQgUXUuOjAuMDAwMCAgIDNyZCBRdS46MC4wMDAwICBcbiAgICAgICAgICAgICAgICAgICAgTWF4LiAgIDozMS4wMCAgICAgICAgICAgICAgICAgICAgICBNYXguICAgOjEuMDAwMCAgIE1heC4gICA6MS4wMDAwICBcbiAgICAgc2NpZmkgICAgICAgICAgIHRocmlsbGVyICAgICAgICAgbXVzaWNhbCAgICAgICAgICAgcm9tYW5jZSAgICAgICAgICB3ZXN0ZXJuICAgICAgIFxuIE1pbi4gICA6MC4wMDAwICAgTWluLiAgIDowLjAwMDAgICBNaW4uICAgOjAuMDAwMDAgICBNaW4uICAgOjAuMDAwMCAgIE1pbi4gICA6MC4wMDAwMCAgXG4gMXN0IFF1LjowLjAwMDAgICAxc3QgUXUuOjAuMDAwMCAgIDFzdCBRdS46MC4wMDAwMCAgIDFzdCBRdS46MC4wMDAwICAgMXN0IFF1LjowLjAwMDAwICBcbiBNZWRpYW4gOjAuMDAwMCAgIE1lZGlhbiA6MC4wMDAwICAgTWVkaWFuIDowLjAwMDAwICAgTWVkaWFuIDowLjAwMDAgICBNZWRpYW4gOjAuMDAwMDAgIFxuIE1lYW4gICA6MC4xMDgzICAgTWVhbiAgIDowLjI5NzkgICBNZWFuICAgOjAuMDcwNDcgICBNZWFuICAgOjAuMjQ1MSAgIE1lYW4gICA6MC4wMTc2MiAgXG4gM3JkIFF1LjowLjAwMDAgICAzcmQgUXUuOjEuMDAwMCAgIDNyZCBRdS46MC4wMDAwMCAgIDNyZCBRdS46MC4wMDAwICAgM3JkIFF1LjowLjAwMDAwICBcbiBNYXguICAgOjEuMDAwMCAgIE1heC4gICA6MS4wMDAwICAgTWF4LiAgIDoxLjAwMDAwICAgTWF4LiAgIDoxLjAwMDAgICBNYXguICAgOjEuMDAwMDAgIFxuICAgICBzcG9ydCAgICAgICAgICAgICBob3Jyb3IgICAgICAgICAgZHJhbWEgICAgICAgICAgICAgd2FyICAgICAgICAgICAgYW5pbWF0aW9uICAgICAgXG4gTWluLiAgIDowLjAwMDAwICAgTWluLiAgIDowLjAwMCAgIE1pbi4gICA6MC4wMDAwICAgTWluLiAgIDowLjAwMDAwICAgTWluLiAgIDowLjAwMDAwICBcbiAxc3QgUXUuOjAuMDAwMDAgICAxc3QgUXUuOjAuMDAwICAgMXN0IFF1LjowLjAwMDAgICAxc3QgUXUuOjAuMDAwMDAgICAxc3QgUXUuOjAuMDAwMDAgIFxuIE1lZGlhbiA6MC4wMDAwMCAgIE1lZGlhbiA6MC4wMDAgICBNZWRpYW4gOjEuMDAwMCAgIE1lZGlhbiA6MC4wMDAwMCAgIE1lZGlhbiA6MC4wMDAwMCAgXG4gTWVhbiAgIDowLjA0ODE5ICAgTWVhbiAgIDowLjExMyAgIE1lYW4gICA6MC41NDkyICAgTWVhbiAgIDowLjAzNjI3ICAgTWVhbiAgIDowLjAxMDM2ICBcbiAzcmQgUXUuOjAuMDAwMDAgICAzcmQgUXUuOjAuMDAwICAgM3JkIFF1LjoxLjAwMDAgICAzcmQgUXUuOjAuMDAwMDAgICAzcmQgUXUuOjAuMDAwMDAgIFxuIE1heC4gICA6MS4wMDAwMCAgIE1heC4gICA6MS4wMDAgICBNYXguICAgOjEuMDAwMCAgIE1heC4gICA6MS4wMDAwMCAgIE1heC4gICA6MS4wMDAwMCAgXG4gICAgIGNyaW1lICAgICAgICBtb3ZpZV9tZXRlcl9JTURCcHJvIGNpbmVtYXRvZ3JhcGhlciAgICBwcm9kdWN0aW9uX2NvbXBhbnlcbiBNaW4uICAgOjAuMDAwMCAgIE1pbi4gICA6ICAgIDcxICAgICAgTGVuZ3RoOjE5MzAgICAgICAgIExlbmd0aDoxOTMwICAgICAgIFxuIDFzdCBRdS46MC4wMDAwICAgMXN0IFF1LjogIDI4MzYgICAgICBDbGFzcyA6Y2hhcmFjdGVyICAgQ2xhc3MgOmNoYXJhY3RlciAgXG4gTWVkaWFuIDowLjAwMDAgICBNZWRpYW4gOiAgNTQwNiAgICAgIE1vZGUgIDpjaGFyYWN0ZXIgICBNb2RlICA6Y2hhcmFjdGVyICBcbiBNZWFuICAgOjAuMjE2MSAgIE1lYW4gICA6IDExNjEyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIDNyZCBRdS46MC4wMDAwICAgM3JkIFF1LjogMTAxOTggICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gTWF4LiAgIDoxLjAwMDAgICBNYXguICAgOjg0OTU1MCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiJ9 -->
+<pre><code> movie_title           movie_id      imdb_link           imdb_score     movie_budget     
+ Length:1930        Min.   :    2   Length:1930        Min.   :1.900   Min.   :  560000  
+ Class :character   1st Qu.: 2528   Class :character   1st Qu.:5.900   1st Qu.: 8725000  
+ Mode  :character   Median : 5802   Mode  :character   Median :6.600   Median :18000000  
+                    Mean   : 7067                      Mean   :6.512   Mean   :20973774  
+                    3rd Qu.:10604                      3rd Qu.:7.300   3rd Qu.:30000000  
+                    Max.   :21838                      Max.   :9.300   Max.   :55000000  
+  release_day    release_month       release_year     duration       language        
+ Min.   : 1.00   Length:1930        Min.   :1936   Min.   : 37.0   Length:1930       
+ 1st Qu.: 9.00   Class :character   1st Qu.:1997   1st Qu.: 96.0   Class :character  
+ Median :17.00   Mode  :character   Median :2004   Median :106.0   Mode  :character  
+ Mean   :15.95                      Mean   :2001   Mean   :109.7                     
+ 3rd Qu.:23.00                      3rd Qu.:2010   3rd Qu.:118.0                     
+ Max.   :30.00                      Max.   :2018   Max.   :330.0                     
+   country          maturity_rating     aspect_ratio   distributor        nb_news_articles 
+ Length:1930        Length:1930        Min.   :1.180   Length:1930        Min.   :    0.0  
+ Class :character   Class :character   1st Qu.:1.850   Class :character   1st Qu.:   78.0  
+ Mode  :character   Mode  :character   Median :2.350   Mode  :character   Median :  286.0  
+                                       Mean   :2.096                      Mean   :  770.6  
+                                       3rd Qu.:2.350                      3rd Qu.:  845.5  
+                                       Max.   :2.760                      Max.   :60620.0  
+   director            actor1          actor1_star_meter    actor2         
+ Length:1930        Length:1930        Min.   :      9   Length:1930       
+ Class :character   Class :character   1st Qu.:    505   Class :character  
+ Mode  :character   Mode  :character   Median :   1888   Mode  :character  
+                                       Mean   :  21190                     
+                                       3rd Qu.:   4665                     
+                                       Max.   :8342201                     
+ actor2_star_meter    actor3          actor3_star_meter colour_film       
+ Min.   :      3   Length:1930        Min.   :      8   Length:1930       
+ 1st Qu.:   1895   Class :character   1st Qu.:   3075   Class :character  
+ Median :   3986   Mode  :character   Median :   5856   Mode  :character  
+ Mean   :  17114                      Mean   :  35469                     
+ 3rd Qu.:   7667                      3rd Qu.:  12250                     
+ Max.   :5529461                      Max.   :6292982                     
+    genres             nb_faces     plot_keywords          action         adventure     
+ Length:1930        Min.   : 0.00   Length:1930        Min.   :0.0000   Min.   :0.0000  
+ Class :character   1st Qu.: 0.00   Class :character   1st Qu.:0.0000   1st Qu.:0.0000  
+ Mode  :character   Median : 1.00   Mode  :character   Median :0.0000   Median :0.0000  
+                    Mean   : 1.44                      Mean   :0.2005   Mean   :0.1264  
+                    3rd Qu.: 2.00                      3rd Qu.:0.0000   3rd Qu.:0.0000  
+                    Max.   :31.00                      Max.   :1.0000   Max.   :1.0000  
+     scifi           thriller         musical           romance          western       
+ Min.   :0.0000   Min.   :0.0000   Min.   :0.00000   Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.00000  
+ Median :0.0000   Median :0.0000   Median :0.00000   Median :0.0000   Median :0.00000  
+ Mean   :0.1083   Mean   :0.2979   Mean   :0.07047   Mean   :0.2451   Mean   :0.01762  
+ 3rd Qu.:0.0000   3rd Qu.:1.0000   3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:0.00000  
+ Max.   :1.0000   Max.   :1.0000   Max.   :1.00000   Max.   :1.0000   Max.   :1.00000  
+     sport             horror          drama             war            animation      
+ Min.   :0.00000   Min.   :0.000   Min.   :0.0000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.000   1st Qu.:0.0000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.000   Median :1.0000   Median :0.00000   Median :0.00000  
+ Mean   :0.04819   Mean   :0.113   Mean   :0.5492   Mean   :0.03627   Mean   :0.01036  
+ 3rd Qu.:0.00000   3rd Qu.:0.000   3rd Qu.:1.0000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.000   Max.   :1.0000   Max.   :1.00000   Max.   :1.00000  
+     crime        movie_meter_IMDBpro cinematographer    production_company
+ Min.   :0.0000   Min.   :    71      Length:1930        Length:1930       
+ 1st Qu.:0.0000   1st Qu.:  2836      Class :character   Class :character  
+ Median :0.0000   Median :  5406      Mode  :character   Mode  :character  
+ Mean   :0.2161   Mean   : 11612                                           
+ 3rd Qu.:0.0000   3rd Qu.: 10198                                           
+ Max.   :1.0000   Max.   :849550                                           </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="y-textimdb-score" class="section level3">
+<h3><span class="math inline">\(y = \text{IMDB Score}\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gaW1kYl9zY29yZSkpICtcbiAgZ2VvbV9oaXN0b2dyYW0oYmlud2lkdGggPSAxKSArXG4gIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3Nfd2lkdGgod2lkdGggPSAxKSkgK1xuICBsYWJzKHggPSBcIklNRGIgUmF0aW5nXCIsIHkgPSBcIk51bWJlciBvZiBtb3ZpZXNcIiwgdGl0bGUgPSBcIkRpc3RyaWJ1dGlvbiBvZiByYXRpbmdzXCIpICtcbiAgdGhlbWVfcHVicigpICtcbiAgdGhlbWVfbG94KClcbmBgYCJ9 -->
+<pre class="r"><code>ggplot(data, aes(x = imdb_score)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = breaks_width(width = 1)) +
+  labs(x = &quot;IMDb Rating&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of ratings&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="movie-budget" class="section level3">
+<h3>Movie budget</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gbW92aWVfYnVkZ2V0KSkgK1xuICBnZW9tX2hpc3RvZ3JhbShiaW5zID0gMjApICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGFiZWxzID0gbGFiZWxfZG9sbGFyKHNjYWxlX2N1dCA9IGN1dF9zaG9ydF9zY2FsZSgpKSkgK1xuICBsYWJzKHggPSBcIk1vdmllIGJ1ZGdldFwiLCB5ID0gXCJOdW1iZXIgb2YgbW92aWVzXCIsIHRpdGxlID0gXCJEaXN0cmlidXRpb24gb2YgbW92aWUgYnVkZ2V0c1wiKSArXG4gIHRoZW1lX3B1YnIoKSArXG4gIHRoZW1lX2xveCgpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(data, aes(x = movie_budget)) +
+  geom_histogram(bins = 20) +
+  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
+  labs(x = &quot;Movie budget&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of movie budgets&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="release-year" class="section level3">
+<h3>Release year</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gcmVsZWFzZV95ZWFyKSkgK1xuICBnZW9tX2hpc3RvZ3JhbShiaW5zID0gMTApICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkobiA9IDEwKSkgK1xuICBsYWJzKHggPSBcIlJlbGVhc2UgWWVhclwiLCB5ID0gXCJOdW1iZXIgb2YgbW92aWVzXCIsIHRpdGxlID0gXCJEaXN0cmlidXRpb24gb2YgcmVsZWFzZSB5ZWFyXCIpICtcbiAgdGhlbWVfcHVicigpICtcbiAgdGhlbWVfbG94KClcbmBgYCJ9 -->
+<pre class="r"><code>ggplot(data, aes(x = release_year)) +
+  geom_histogram(bins = 10) +
+  scale_x_continuous(breaks = breaks_pretty(n = 10)) +
+  labs(x = &quot;Release Year&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of release year&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="number-of-faces" class="section level3">
+<h3>Number of faces</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gbmJfZmFjZXMpKSArXG4gIGdlb21faGlzdG9ncmFtKCkgK1xuICBzY2FsZV94X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpKSArXG4gIGxhYnMoeCA9IFwiTnVtYmVyIG9mIGZhY2VzXCIsIHkgPSBcIk51bWJlciBvZiBtb3ZpZXNcIiwgdGl0bGUgPSBcIkRpc3RyaWJ1dGlvbiBvZiBudW1iZXIgb2YgZmFjZXMgaW4gdGhlIG1vdmllIHBvc3RlclwiKSArXG4gIHRoZW1lX3B1YnIoKSArXG4gIHRoZW1lX2xveCgpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(data, aes(x = nb_faces)) +
+  geom_histogram() +
+  scale_x_continuous(breaks = breaks_pretty()) +
+  labs(x = &quot;Number of faces&quot;, y = &quot;Number of movies&quot;, title = &quot;Distribution of number of faces in the movie poster&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="duration" class="section level3">
+<h3>Duration</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gZHVyYXRpb24pKSArXG4gIGdlb21fYm94cGxvdCgpICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSkgK1xuICBsYWJzKHggPSBcIkR1cmF0aW9uXCIsIHRpdGxlID0gXCJCb3hwbG90IG9mIG1vdmllIGR1cmF0aW9uXCIpICtcbiAgdGhlbWVfcHVicigpICtcbiAgdGhlbWVfbG94KCkgK1xuICB0aGVtZShheGlzLnRpY2tzLnkgPSBlbGVtZW50X2JsYW5rKCksIGF4aXMudGV4dC55ID0gZWxlbWVudF9ibGFuaygpKVxuYGBgIn0= -->
+<pre class="r"><code>ggplot(data, aes(x = duration)) +
+  geom_boxplot() +
+  scale_x_continuous(breaks = breaks_pretty()) +
+  labs(x = &quot;Duration&quot;, title = &quot;Boxplot of movie duration&quot;) +
+  theme_pubr() +
+  theme_lox() +
+  theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="bivariate-distributions" class="section level2">
+<h2>Bivariate distributions</h2>
+<div id="textmovie-budgets-sim-y" class="section level3">
+<h3><span class="math inline">\(\text{Movie budgets} \sim
+y\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gbW92aWVfYnVkZ2V0LCB5ID0gaW1kYl9zY29yZSkpICtcbiAgZ2VvbV9wb2ludCgpICtcbiAgZ2VvbV90ZXh0X3JlcGVsKGFlcyhsYWJlbCA9IG1vdmllX3RpdGxlKSwgc2l6ZSA9IDMsIG1heC5vdmVybGFwcyA9IDUsIG51ZGdlX3kgPSAwLjUpICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGFiZWxzID0gbGFiZWxfZG9sbGFyKHNjYWxlX2N1dCA9IGN1dF9zaG9ydF9zY2FsZSgpKSkgK1xuICBsYWJzKHggPSBcIk1vdmllIGJ1ZGdldFwiLCB5ID0gXCJJTURiIFNjb3JlXCIsIHRpdGxlID0gXCJNb3ZpZSBidWRnZXQgYW5kIElNRGIgc2NvcmVcIikgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKVxuYGBgIn0= -->
+<pre class="r"><code>ggplot(data, aes(x = movie_budget, y = imdb_score)) +
+  geom_point() +
+  geom_text_repel(aes(label = movie_title), size = 3, max.overlaps = 5, nudge_y = 0.5) +
+  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
+  labs(x = &quot;Movie budget&quot;, y = &quot;IMDb Score&quot;, title = &quot;Movie budget and IMDb score&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="textduration-sim-y" class="section level3">
+<h3><span class="math inline">\(\text{Duration} \sim y\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4ID0gZHVyYXRpb24sIHkgPSBpbWRiX3Njb3JlKSkgK1xuICBnZW9tX3BvaW50KCkgK1xuICBnZW9tX3RleHRfcmVwZWwoYWVzKGxhYmVsID0gbW92aWVfdGl0bGUpLCBzaXplID0gMywgbWF4Lm92ZXJsYXBzID0gMTAsIG51ZGdlX3kgPSAwLjUpICtcbiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGFiZWxzID0gbGFiZWxfbnVtYmVyKCkpICtcbiAgbGFicyh4ID0gXCJEdXJhdGlvblwiLCB5ID0gXCJJTURiIFNjb3JlXCIsIHRpdGxlID0gXCJNb3ZpZSBkdXJhdGlvbiBhbmQgSU1EYiBzY29yZVwiKSArXG4gIHRoZW1lX3B1YnIoKSArXG4gIHRoZW1lX2xveCgpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(data, aes(x = duration, y = imdb_score)) +
+  geom_point() +
+  geom_text_repel(aes(label = movie_title), size = 3, max.overlaps = 10, nudge_y = 0.5) +
+  scale_x_continuous(breaks = breaks_pretty(), labels = label_number()) +
+  labs(x = &quot;Duration&quot;, y = &quot;IMDb Score&quot;, title = &quot;Movie duration and IMDb score&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="textgenre-sim-y" class="section level3">
+<h3><span class="math inline">\(\text{Genre} \sim y\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiVcbiAgc2VsZWN0KG1vdmllX2lkLCBpbWRiX3Njb3JlLCBhY3Rpb246Y3JpbWUpICU+JVxuICBwaXZvdF9sb25nZXIoY29scyA9IGMoLWltZGJfc2NvcmUsIC1tb3ZpZV9pZCksIG5hbWVzX3RvID0gXCJnZW5yZVwiKSAlPiVcbiAgbXV0YXRlKGdlbnJlID0gc3RyX3RvX3NlbnRlbmNlKGdlbnJlKSkgJT4lXG4gIGdyb3VwX2J5KGdlbnJlKSAlPiVcbiAgZmlsdGVyKHZhbHVlID09IDEpICU+JVxuICBzdW1tYXJpc2UoYXZnX3Njb3JlID0gbWVhbihpbWRiX3Njb3JlKSwgbnVtX21vdmllcyA9IG4oKSkgJT4lXG4gIGdncGxvdChhZXMoeCA9IGdlbnJlLCB5ID0gYXZnX3Njb3JlLCBmaWxsID0gZ2VucmUpKSArXG4gIGdlb21fY29sKCkgK1xuICBnZW9tX3RleHRfcmVwZWwoYWVzKHkgPSBhdmdfc2NvcmUsIGxhYmVsID0gbnVtX21vdmllcyksIG51ZGdlX3kgPSAwLjEpICtcbiAgc2NhbGVfZmlsbF90YWJsZWF1KHBhbGV0dGUgPSBcIlRhYmxlYXUgMjBcIikgK1xuICBzY2FsZV95X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpLCBsaW1pdHMgPSBjKDAsIDEwKSkgK1xuICBndWlkZXMoZmlsbCA9IFwibm9uZVwiKSArXG4gIGxhYnMoeCA9IFwiR2VucmVcIiwgeSA9IFwiQXZlcmFnZSBJTURiIFNjb3JlXCIsIHRpdGxlID0gXCJBdmVyYWdlIElNRGIgc2NvcmUgYnkgZ2VucmVcIikgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKSArXG4gIHRoZW1lKHBhbmVsLmdyaWQubWFqb3IueCA9IGVsZW1lbnRfYmxhbmsoKSlcbmBgYCJ9 -->
+<pre class="r"><code>data %&gt;%
+  select(movie_id, imdb_score, action:crime) %&gt;%
+  pivot_longer(cols = c(-imdb_score, -movie_id), names_to = &quot;genre&quot;) %&gt;%
+  mutate(genre = str_to_sentence(genre)) %&gt;%
+  group_by(genre) %&gt;%
+  filter(value == 1) %&gt;%
+  summarise(avg_score = mean(imdb_score), num_movies = n()) %&gt;%
+  ggplot(aes(x = genre, y = avg_score, fill = genre)) +
+  geom_col() +
+  geom_text_repel(aes(y = avg_score, label = num_movies), nudge_y = 0.1) +
+  scale_fill_tableau(palette = &quot;Tableau 20&quot;) +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = &quot;none&quot;) +
+  labs(x = &quot;Genre&quot;, y = &quot;Average IMDb Score&quot;, title = &quot;Average IMDb score by genre&quot;) +
+  theme_pubr() +
+  theme_lox() +
+  theme(panel.grid.major.x = element_blank())</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiVcbiAgc2VsZWN0KG1vdmllX2lkLCBtb3ZpZV90aXRsZSwgaW1kYl9zY29yZSwgYWN0aW9uOmNyaW1lKSAlPiVcbiAgcGl2b3RfbG9uZ2VyKGNvbHMgPSBjKC1pbWRiX3Njb3JlLCAtbW92aWVfaWQsIC1tb3ZpZV90aXRsZSksIG5hbWVzX3RvID0gXCJnZW5yZVwiKSAlPiVcbiAgbXV0YXRlKGdlbnJlID0gc3RyX3RvX3NlbnRlbmNlKGdlbnJlKSkgJT4lXG4gIGdyb3VwX2J5KGdlbnJlKSAlPiVcbiAgZmlsdGVyKHZhbHVlID09IDEpICU+JVxuICBnZ3Bsb3QoYWVzKHggPSBnZW5yZSwgeSA9IGltZGJfc2NvcmUsIGZpbGwgPSBnZW5yZSkpICtcbiAgZ2VvbV9ib3hwbG90KCkgK1xuICBzY2FsZV9maWxsX3RhYmxlYXUocGFsZXR0ZSA9IFwiVGFibGVhdSAyMFwiKSArXG4gIHNjYWxlX3lfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCksIGxpbWl0cyA9IGMoMCwgMTApKSArXG4gIGd1aWRlcyhmaWxsID0gXCJub25lXCIpICtcbiAgbGFicyh4ID0gXCJHZW5yZVwiLCB5ID0gXCJJTURiIFNjb3JlXCIsIHRpdGxlID0gXCJCb3hwbG90IG9mIElNRGIgc2NvcmUgYnkgZ2VucmVcIiwgY2FwdGlvbiA9IFwiTW92aWVzIHNwYW4gYWNyb3NzIGdlbnJlc1wiKSArXG4gIHRoZW1lX3B1YnIoKSArXG4gIHRoZW1lX2xveCgpXG5gYGAifQ== -->
+<pre class="r"><code>data %&gt;%
+  select(movie_id, movie_title, imdb_score, action:crime) %&gt;%
+  pivot_longer(cols = c(-imdb_score, -movie_id, -movie_title), names_to = &quot;genre&quot;) %&gt;%
+  mutate(genre = str_to_sentence(genre)) %&gt;%
+  group_by(genre) %&gt;%
+  filter(value == 1) %&gt;%
+  ggplot(aes(x = genre, y = imdb_score, fill = genre)) +
+  geom_boxplot() +
+  scale_fill_tableau(palette = &quot;Tableau 20&quot;) +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = &quot;none&quot;) +
+  labs(x = &quot;Genre&quot;, y = &quot;IMDb Score&quot;, title = &quot;Boxplot of IMDb score by genre&quot;, caption = &quot;Movies span across genres&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="textrelease-month-sim-y" class="section level3">
+<h3><span class="math inline">\(\text{Release Month} \sim
+y\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiVcbiAgbXV0YXRlKHJlbGVhc2VfZGF0ZSA9IGRteShzdHJfYyhyZWxlYXNlX2RheSwgcmVsZWFzZV9tb250aCwgcmVsZWFzZV95ZWFyLCBzZXAgPSBcIi1cIikpKSAlPiVcbiAgbXV0YXRlKHJlbGVhc2VfbW9udGggPSBtb250aChyZWxlYXNlX2RhdGUsIGxhYmVsID0gVFJVRSkpICU+JVxuICBnZ3Bsb3QoYWVzKHggPSByZWxlYXNlX21vbnRoLCB5ID0gaW1kYl9zY29yZSwgZmlsbCA9IHJlbGVhc2VfbW9udGgpKSArXG4gIGdlb21fYm94cGxvdChvdXRsaWVyLnNpemUgPSAzKSArXG4gIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWwgPSBtb3ZpZV90aXRsZSksIG1heC5vdmVybGFwcyA9IDUpICtcbiAgc2NhbGVfZmlsbF90YWJsZWF1KHBhbGV0dGUgPSBcIlRhYmxlYXUgMjBcIikgK1xuICBzY2FsZV95X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpLCBsaW1pdHMgPSBjKDAsIDEwKSkgK1xuICBndWlkZXMoZmlsbCA9IFwibm9uZVwiKSArXG4gIGxhYnMoeCA9IFwiUmVsZWFzZSBNb250aFwiLCB5ID0gXCJJTURiIFNjb3JlXCIsIHRpdGxlID0gXCJCb3hwbG90IG9mIElNRGIgc2NvcmUgYnkgcmVsZWFzZSBtb250aFwiKSArXG4gIHRoZW1lX3B1YnIoKSArXG4gIHRoZW1lX2xveCgpXG5gYGAifQ== -->
+<pre class="r"><code>data %&gt;%
+  mutate(release_date = dmy(str_c(release_day, release_month, release_year, sep = &quot;-&quot;))) %&gt;%
+  mutate(release_month = month(release_date, label = TRUE)) %&gt;%
+  ggplot(aes(x = release_month, y = imdb_score, fill = release_month)) +
+  geom_boxplot(outlier.size = 3) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 5) +
+  scale_fill_tableau(palette = &quot;Tableau 20&quot;) +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = &quot;none&quot;) +
+  labs(x = &quot;Release Month&quot;, y = &quot;IMDb Score&quot;, title = &quot;Boxplot of IMDb score by release month&quot;) +
+  theme_pubr() +
+  theme_lox()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="textactor-1-sim-y" class="section level3">
+<h3><span class="math inline">\(\text{Actor 1} \sim y\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiVcbiAgZmlsdGVyKGFjdG9yMSAlaW4lIChcbiAgICBkYXRhICU+JVxuICAgICAgZ3JvdXBfYnkoYWN0b3IxKSAlPiVcbiAgICAgIGNvdW50KHNvcnQgPSBUUlVFKSAlPiVcbiAgICAgIGhlYWQoMTApXG4gICkkYWN0b3IxKSAlPiVcbiAgZ2dwbG90KGFlcyhcbiAgICB4ID0gZmN0X3Jlb3JkZXIoYWN0b3IxLCBpbWRiX3Njb3JlLCAuZnVuID0gbWVkaWFuKSxcbiAgICB5ID0gaW1kYl9zY29yZSxcbiAgICBmaWxsID0gYWN0b3IxXG4gICkpICtcbiAgZ2VvbV9ib3hwbG90KG91dGxpZXIuc2l6ZSA9IDMpICtcbiAgZ2VvbV90ZXh0X3JlcGVsKGFlcyhsYWJlbCA9IG1vdmllX3RpdGxlKSwgbWF4Lm92ZXJsYXBzID0gNykgK1xuICBzY2FsZV9maWxsX3RhYmxlYXUocGFsZXR0ZSA9IFwiVGFibGVhdSAyMFwiKSArXG4gIHNjYWxlX3lfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCksIGxpbWl0cyA9IGMoMCwgMTApKSArXG4gIGd1aWRlcyhmaWxsID0gXCJub25lXCIpICtcbiAgbGFicyhcbiAgICB4ID0gXCJBY3RvciAxIE5hbWVcIixcbiAgICB5ID0gXCJJTURiIFNjb3JlXCIsXG4gICAgdGl0bGUgPSBcIkJveHBsb3Qgb2YgSU1EYiBzY29yZSBieSBBY3RvciAxXCIsXG4gICAgc3VidGl0bGUgPSBcIlRvcCAxMCBhY3RvcnMgYnkgbnVtYmVyIG9mIG1vdmllcyBzaG93blwiXG4gICkgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKSArXG4gIGNvb3JkX2ZsaXAoKVxuXG5gYGAifQ== -->
+<pre class="r"><code>data %&gt;%
+  filter(actor1 %in% (
+    data %&gt;%
+      group_by(actor1) %&gt;%
+      count(sort = TRUE) %&gt;%
+      head(10)
+  )$actor1) %&gt;%
+  ggplot(aes(
+    x = fct_reorder(actor1, imdb_score, .fun = median),
+    y = imdb_score,
+    fill = actor1
+  )) +
+  geom_boxplot(outlier.size = 3) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 7) +
+  scale_fill_tableau(palette = &quot;Tableau 20&quot;) +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = &quot;none&quot;) +
+  labs(
+    x = &quot;Actor 1 Name&quot;,
+    y = &quot;IMDb Score&quot;,
+    title = &quot;Boxplot of IMDb score by Actor 1&quot;,
+    subtitle = &quot;Top 10 actors by number of movies shown&quot;
+  ) +
+  theme_pubr() +
+  theme_lox() +
+  coord_flip()
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="textdistributor-sim-y" class="section level3">
+<h3><span class="math inline">\(\text{Distributor} \sim y\)</span></h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiVcbiAgZmlsdGVyKGRpc3RyaWJ1dG9yICVpbiVcbiAgICAgICAgICAgKGRhdGEgJT4lXG4gICAgICAgICAgICAgIGdyb3VwX2J5KGRpc3RyaWJ1dG9yKSAlPiVcbiAgICAgICAgICAgICAgY291bnQoc29ydCA9IFRSVUUpICU+JVxuICAgICAgICAgICAgICBoZWFkKDEwKSkkZGlzdHJpYnV0b3IpICU+JVxuICBnZ3Bsb3QoYWVzKHggPSBkaXN0cmlidXRvciwgeSA9IGltZGJfc2NvcmUsIGZpbGwgPSBkaXN0cmlidXRvcikpICtcbiAgZ2VvbV9ib3hwbG90KG91dGxpZXIuc2l6ZSA9IDMpICtcbiAgZ2VvbV90ZXh0X3JlcGVsKGFlcyhsYWJlbCA9IG1vdmllX3RpdGxlKSwgbWF4Lm92ZXJsYXBzID0gNSkgK1xuICBzY2FsZV9maWxsX3RhYmxlYXUocGFsZXR0ZSA9IFwiVGFibGVhdSAyMFwiKSArXG4gIHNjYWxlX3lfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCksIGxpbWl0cyA9IGMoMCwgMTApKSArXG4gIGd1aWRlcyhmaWxsID0gXCJub25lXCIpICtcbiAgbGFicyhcbiAgICB4ID0gXCJEaXN0cmlidXRvclwiLFxuICAgIHkgPSBcIklNRGIgU2NvcmVcIixcbiAgICB0aXRsZSA9IFwiQm94cGxvdCBvZiBJTURiIHNjb3JlIGJ5IGRpc3RyaWJ1dG9yXCIsXG4gICAgc3VidGl0bGUgPSBcIlRvcCAxMCBkaXN0cmlidXRvcnMgYnkgbnVtYmVyIG9mIG1vdmllcyBzaG93blwiXG4gICkgK1xuICB0aGVtZV9wdWJyKCkgK1xuICB0aGVtZV9sb3goKSArXG4gIGNvb3JkX2ZsaXAoKVxuICBcbmBgYCJ9 -->
+<pre class="r"><code>data %&gt;%
+  filter(distributor %in%
+           (data %&gt;%
+              group_by(distributor) %&gt;%
+              count(sort = TRUE) %&gt;%
+              head(10))$distributor) %&gt;%
+  ggplot(aes(x = distributor, y = imdb_score, fill = distributor)) +
+  geom_boxplot(outlier.size = 3) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 5) +
+  scale_fill_tableau(palette = &quot;Tableau 20&quot;) +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = &quot;none&quot;) +
+  labs(
+    x = &quot;Distributor&quot;,
+    y = &quot;IMDb Score&quot;,
+    title = &quot;Boxplot of IMDb score by distributor&quot;,
+    subtitle = &quot;Top 10 distributors by number of movies shown&quot;
+  ) +
+  theme_pubr() +
+  theme_lox() +
+  coord_flip()
+  </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+</div>
+<div id="data-preprocessing" class="section level1">
+<h1>Data preprocessing</h1>
+<div id="checking-data-types" class="section level2">
+<h2>Checking data types</h2>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiUgc3RyKClcbmBgYCJ9 -->
+<pre class="r"><code>data %&gt;% str()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSA8LSBkYXRhICU+JVxuICBtdXRhdGUoYWNyb3NzKC5jb2xzID0gYygnbGFuZ3VhZ2UnLCAnY291bnRyeScsICdtYXR1cml0eV9yYXRpbmcnLCAnYXNwZWN0X3JhdGlvJywgJ2Rpc3RyaWJ1dG9yJywgJ2RpcmVjdG9yJywgJ2NvbG91cl9maWxtJywgJ2NpbmVtYXRvZ3JhcGhlcicsICdwcm9kdWN0aW9uX2NvbXBhbnknKSwgfmZhY3RvcigueCkpKVxuYGBgIn0= -->
+<pre class="r"><code>data &lt;- data %&gt;%
+  mutate(across(.cols = c(&#39;language&#39;, &#39;country&#39;, &#39;maturity_rating&#39;, &#39;aspect_ratio&#39;, &#39;distributor&#39;, &#39;director&#39;, &#39;colour_film&#39;, &#39;cinematographer&#39;, &#39;production_company&#39;), ~factor(.x)))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="checking-for-multicollinearity" class="section level2">
+<h2>Checking for multicollinearity</h2>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmlmX21vZGVsIDwtIGxtKGltZGJfc2NvcmUgfiAuLCBkYXRhID0gKGRhdGEgJT4lIHNlbGVjdCh3aGVyZShpcy5udW1lcmljKSkpKVxuXG52aWYodmlmX21vZGVsKVxuYGBgIn0= -->
+<pre class="r"><code>vif_model &lt;- lm(imdb_score ~ ., data = (data %&gt;% select(where(is.numeric))))
+
+vif(vif_model)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>We see that there is no multicollinearity among the numeric variables
+in the dataset.</p>
+</div>
+<div id="feature-engineering" class="section level2">
+<h2>Feature engineering</h2>
+<div id="checking-levels-for-categorical-columns" class="section level3">
+<h3>Checking levels for categorical columns</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2F0ZWdvcmljYWxfY29sdW1ucyA8LSBkYXRhICU+JVxuICBzdW1tYXJpemUoYWNyb3NzKHdoZXJlKGlzLmZhY3RvciksIH5ubGV2ZWxzKC54KSkpICU+JVxuICBwaXZvdF9sb25nZXIoZXZlcnl0aGluZygpLCBuYW1lc190byA9IFwidmFyaWFibGVcIiwgdmFsdWVzX3RvID0gXCJudW1fbGV2ZWxzXCIpXG5cbmNhdGVnb3JpY2FsX2NvbHVtbnNcbmBgYCJ9 -->
+<pre class="r"><code>categorical_columns &lt;- data %&gt;%
+  summarize(across(where(is.factor), ~nlevels(.x))) %&gt;%
+  pivot_longer(everything(), names_to = &quot;variable&quot;, values_to = &quot;num_levels&quot;)
+
+categorical_columns</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>We see that director, cinematographer, and production company have a
+lot of unique values. A priori, we expect to drop these columns when
+building the model.</p>
+<p>Let us check the counts for the other variables</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2F0ZWdvcmljYWxfY29sdW1ucyAlPiUgXG4gIGZpbHRlcighdmFyaWFibGUgJWluJSBjKFwiZGlyZWN0b3JcIiwgXCJjaW5lbWF0b2dyYXBoZXJcIiwgXCJwcm9kdWN0aW9uX2NvbXBhbnlcIikpICU+JVxuICBwdWxsKHZhcmlhYmxlKSAlPiVcbiAgd2FsayhcbiAgICB+IGRhdGEgJT4lXG4gICAgICBncm91cF9ieV9hdCgueCkgJT4lXG4gICAgICBjb3VudChzb3J0ID0gVFJVRSkgJT4lXG4gICAgICBwcmludCgpXG4gIClcbiAgICBcbmBgYCJ9 -->
+<pre class="r"><code>categorical_columns %&gt;% 
+  filter(!variable %in% c(&quot;director&quot;, &quot;cinematographer&quot;, &quot;production_company&quot;)) %&gt;%
+  pull(variable) %&gt;%
+  walk(
+    ~ data %&gt;%
+      group_by_at(.x) %&gt;%
+      count(sort = TRUE) %&gt;%
+      print()
+  )
+    </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>We see that:</p>
+<ul>
+<li>The language is primarily “English”</li>
+<li>The country is primarily “USA”</li>
+</ul>
+<p>These features can also be dropped when building the model.</p>
+<p>For distributor and plot keywords, we can create binary features for
+the top 10 values by count.</p>
+</div>
+<div id="top-10-keywords" class="section level3">
+<h3>Top 10 keywords</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudG9wXzEwX2tleXdvcmRzIDwtIGRhdGEgJT4lXG4gIHNlbGVjdChwbG90X2tleXdvcmRzKSAlPiVcbiAgc2VwYXJhdGVfbG9uZ2VyX2RlbGltKGNvbHMgPSBcInBsb3Rfa2V5d29yZHNcIiwgZGVsaW0gPSBcInxcIikgJT4lXG4gIGdyb3VwX2J5KHBsb3Rfa2V5d29yZHMpICU+JVxuICBjb3VudChzb3J0ID0gVFJVRSkgJT4lXG4gIGhlYWQoMTApXG5cbmZvciAoa2V5d29yZCBpbiB0b3BfMTBfa2V5d29yZHMkcGxvdF9rZXl3b3Jkcykge1xuICBjb2xfbmFtZSA8LSBnbHVlKFwicGxvdF97a2V5d29yZH1cIilcbiAgZGF0YVtbY29sX25hbWVdXSA8LVxuICAgIGFzLmludGVnZXIobGFwcGx5KGRhdGEkcGxvdF9rZXl3b3JkcywgZnVuY3Rpb24gKHgpIHtcbiAgICAgIHN0cl9kZXRlY3QoeCwga2V5d29yZClcbiAgICB9KSlcbn1cbmBgYCJ9 -->
+<pre class="r"><code>top_10_keywords &lt;- data %&gt;%
+  select(plot_keywords) %&gt;%
+  separate_longer_delim(cols = &quot;plot_keywords&quot;, delim = &quot;|&quot;) %&gt;%
+  group_by(plot_keywords) %&gt;%
+  count(sort = TRUE) %&gt;%
+  head(10)
+
+for (keyword in top_10_keywords$plot_keywords) {
+  col_name &lt;- glue(&quot;plot_{keyword}&quot;)
+  data[[col_name]] &lt;-
+    as.integer(lapply(data$plot_keywords, function (x) {
+      str_detect(x, keyword)
+    }))
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="top-10-distributors" class="section level3">
+<h3>Top 10 distributors</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudG9wXzEwX2Rpc3RyaWJ1dG9ycyA8LSBkYXRhICU+JVxuICBzZWxlY3QoZGlzdHJpYnV0b3IpICU+JVxuICBzZXBhcmF0ZV9sb25nZXJfZGVsaW0oY29scyA9IFwiZGlzdHJpYnV0b3JcIiwgZGVsaW0gPSBcInxcIikgJT4lXG4gIGdyb3VwX2J5KGRpc3RyaWJ1dG9yKSAlPiVcbiAgY291bnQoc29ydCA9IFRSVUUpICU+JVxuICBoZWFkKDEwKVxuXG5mb3IgKGRpc3RyaWJ1dG9yIGluIHRvcF8xMF9kaXN0cmlidXRvcnMkZGlzdHJpYnV0b3IpIHtcbiAgY29sX25hbWUgPC0gZ2x1ZShcImRpc3RyaWJ1dG9yX3tkaXN0cmlidXRvcn1cIilcbiAgZGF0YVtbY29sX25hbWVdXSA8LVxuICAgIGFzLmludGVnZXIobGFwcGx5KGRhdGEkZGlzdHJpYnV0b3IsIGZ1bmN0aW9uICh4KSB7XG4gICAgICBzdHJfZGV0ZWN0KHgsIGRpc3RyaWJ1dG9yKVxuICAgIH0pKVxufVxuYGBgIn0= -->
+<pre class="r"><code>top_10_distributors &lt;- data %&gt;%
+  select(distributor) %&gt;%
+  separate_longer_delim(cols = &quot;distributor&quot;, delim = &quot;|&quot;) %&gt;%
+  group_by(distributor) %&gt;%
+  count(sort = TRUE) %&gt;%
+  head(10)
+
+for (distributor in top_10_distributors$distributor) {
+  col_name &lt;- glue(&quot;distributor_{distributor}&quot;)
+  data[[col_name]] &lt;-
+    as.integer(lapply(data$distributor, function (x) {
+      str_detect(x, distributor)
+    }))
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="removing-variables" class="section level2">
+<h2>Removing variables</h2>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29sdW1uc190b19yZW1vdmUgPC1cbiAgYyhcbiAgICBcImltZGJfbGlua1wiLFxuICAgIFwiYWN0b3IxXCIsXG4gICAgXCJhY3RvcjJcIixcbiAgICBcImFjdG9yM1wiLFxuICAgIFwiZ2VucmVzXCIsXG4gICAgXCJyZWxlYXNlX3llYXJcIixcbiAgICBcImRpcmVjdG9yXCIsIFxuICAgIFwiY2luZW1hdG9ncmFwaGVyXCIsIFxuICAgIFwicHJvZHVjdGlvbl9jb21wYW55XCIsXG4gICAgXCJsYW5ndWFnZVwiLFxuICAgIFwiY291bnRyeVwiLFxuICAgIFwiZGlzdHJpYnV0b3JcIixcbiAgICBcInBsb3Rfa2V5d29yZHNcIlxuICApXG5cbmRhdGEgPC0gZGF0YSAlPiUgc2VsZWN0KC1hbGxfb2YoY29sdW1uc190b19yZW1vdmUpKVxuYGBgIn0= -->
+<pre class="r"><code>columns_to_remove &lt;-
+  c(
+    &quot;imdb_link&quot;,
+    &quot;actor1&quot;,
+    &quot;actor2&quot;,
+    &quot;actor3&quot;,
+    &quot;genres&quot;,
+    &quot;release_year&quot;,
+    &quot;director&quot;, 
+    &quot;cinematographer&quot;, 
+    &quot;production_company&quot;,
+    &quot;language&quot;,
+    &quot;country&quot;,
+    &quot;distributor&quot;,
+    &quot;plot_keywords&quot;
+  )
+
+data &lt;- data %&gt;% select(-all_of(columns_to_remove))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YSAlPiUgaGVhZCgpXG5gYGAifQ== -->
+<pre class="r"><code>data %&gt;% head()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIk1HU0MgNjYxIC0gTWlkdGVybSBQcm9qZWN0Ig0Kb3V0cHV0Og0KICBwZGZfZG9jdW1lbnQ6IGRlZmF1bHQNCiAgaHRtbF9ub3RlYm9vazogZGVmYXVsdA0KLS0tDQoNCiMgSW1wb3J0aW5nIGRhdGENCg0KYGBge3IgaW5jbHVkZT1GQUxTRX0NClN5cy5zZXRsb2NhbGUoIkxDX0FMTCIsICJDIikNCnJlcXVpcmUodmlzcmVnKQ0KcmVxdWlyZShnbHVlKQ0KcmVxdWlyZShjYXIpDQpyZXF1aXJlKGxtdGVzdCkNCnJlcXVpcmUoc3BsaW5lcykNCnJlcXVpcmUocHN5Y2gpDQpyZXF1aXJlKHN0YXJnYXplcikNCnJlcXVpcmUocGxtKQ0KcmVxdWlyZShnZ3Bsb3QyKQ0KcmVxdWlyZShnZ3RleHQpDQpyZXF1aXJlKGdncHVicikNCnJlcXVpcmUoZ2dyZXBlbCkNCnJlcXVpcmUoZ2d0aGVtZXMpDQpyZXF1aXJlKHNjYWxlcykNCnJlcXVpcmUoY2FUb29scykNCnJlcXVpcmUobWV0aG9kcykNCnJlcXVpcmUoYm9vdCkNCnJlcXVpcmUodGlkeXZlcnNlKQ0KcmVxdWlyZShkcGx5cikNCnJlcXVpcmUoZ2x1ZSkNCg0Kd2luZG93c0ZvbnRzKEhlbHZldGljYSA9ICJQcm9kdWN0IFNhbnMiKQ0KYGBgDQoNCmBgYHtyfQ0KdGhlbWVfbG94IDwtIGZ1bmN0aW9uKCkgew0KICB0aGVtZSgNCiAgICBwYW5lbC5ncmlkLm1ham9yLnggPSBlbGVtZW50X2xpbmUobGluZXdpZHRoID0gMC4zLCBjb2xvdXIgPSAiI2NiY2JjYiIpLA0KICAgIHBhbmVsLmdyaWQubWFqb3IueSA9IGVsZW1lbnRfbGluZShsaW5ld2lkdGggPSAwLjMsIGNvbG91ciA9ICIjY2JjYmNiIiksDQogICAgcGxvdC50aXRsZSA9IGVsZW1lbnRfbWFya2Rvd24oDQogICAgICBmYW1pbHkgPSAiSGVsdmV0aWNhIiwNCiAgICAgIHNpemUgPSAyMiwNCiAgICAgIGZhY2UgPSAiYm9sZCIsDQogICAgICBjb2xvciA9ICIjMjIyMjIyIg0KICAgICksDQogICAgcGxvdC5zdWJ0aXRsZSA9IGVsZW1lbnRfdGV4dCgNCiAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgc2l6ZSA9IDE2LA0KICAgICAgbWFyZ2luID0gbWFyZ2luKDIsIDAsIDIsIDApDQogICAgKSwNCiAgICBwbG90LmNhcHRpb24gPSBlbGVtZW50X3RleHQoZmFtaWx5ID0gIkhlbHZldGljYSIsIGZhY2UgPSAiYm9sZCIpLA0KICAgIGF4aXMudGV4dCA9IGVsZW1lbnRfdGV4dCgNCiAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgc2l6ZSA9IDEyLA0KICAgICAgY29sb3IgPSAiIzIyMjIyMiINCiAgICApLA0KICAgIGF4aXMudGl0bGUgPSBlbGVtZW50X3RleHQoDQogICAgICBmYW1pbHkgPSAiSGVsdmV0aWNhIiwNCiAgICAgIHNpemUgPSAxNCwNCiAgICAgIGNvbG9yID0gIiMyMjIyMjIiDQogICAgKSwNCiAgICBsZWdlbmQudGV4dCA9IGVsZW1lbnRfdGV4dChmYW1pbHkgPSAiSGVsdmV0aWNhIiwgc2l6ZSA9IDEyKSwNCiAgICBsZWdlbmQudGl0bGUgPSBlbGVtZW50X3RleHQoDQogICAgICBmYW1pbHkgPSAiSGVsdmV0aWNhIiwNCiAgICAgIHNpemUgPSAxNCwNCiAgICAgIGZhY2UgPSAiYm9sZCINCiAgICApLA0KICAgIGxlZ2VuZC5wb3NpdGlvbiA9ICJyaWdodCIsDQogICAgc3RyaXAudGV4dCA9IGVsZW1lbnRfdGV4dCgNCiAgICAgIGZhbWlseSA9ICJIZWx2ZXRpY2EiLA0KICAgICAgc2l6ZSA9IDEyLA0KICAgICAgaGp1c3QgPSAwLjUNCiAgICApDQogICkNCn0NCmBgYA0KDQpgYGB7cn0NCmRhdGEgPC0gcmVhZC5jc3YoIi4vSU1EQl9kYXRhX0ZhbGxfMjAyMy5jc3YiKQ0KYXR0YWNoKGRhdGEpDQpgYGANCg0KIyBFeHBsb3JhdG9yeSBkYXRhIGFuYWx5c2lzDQoNCmBgYHtyIHBhZ2VkLnByaW50PVRSVUV9DQpoZWFkKGRhdGEpDQpzdW1tYXJ5KGRhdGEpDQpgYGANCg0KIyMjICR5ID0gXHRleHR7SU1EQiBTY29yZX0kDQoNCmBgYHtyfQ0KZ2dwbG90KGRhdGEsIGFlcyh4ID0gaW1kYl9zY29yZSkpICsNCiAgZ2VvbV9oaXN0b2dyYW0oYmlud2lkdGggPSAxKSArDQogIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3Nfd2lkdGgod2lkdGggPSAxKSkgKw0KICBsYWJzKHggPSAiSU1EYiBSYXRpbmciLCB5ID0gIk51bWJlciBvZiBtb3ZpZXMiLCB0aXRsZSA9ICJEaXN0cmlidXRpb24gb2YgcmF0aW5ncyIpICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkNCmBgYA0KDQojIyMgTW92aWUgYnVkZ2V0DQoNCmBgYHtyfQ0KZ2dwbG90KGRhdGEsIGFlcyh4ID0gbW92aWVfYnVkZ2V0KSkgKw0KICBnZW9tX2hpc3RvZ3JhbShiaW5zID0gMjApICsNCiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGFiZWxzID0gbGFiZWxfZG9sbGFyKHNjYWxlX2N1dCA9IGN1dF9zaG9ydF9zY2FsZSgpKSkgKw0KICBsYWJzKHggPSAiTW92aWUgYnVkZ2V0IiwgeSA9ICJOdW1iZXIgb2YgbW92aWVzIiwgdGl0bGUgPSAiRGlzdHJpYnV0aW9uIG9mIG1vdmllIGJ1ZGdldHMiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGANCg0KIyMjIFJlbGVhc2UgeWVhcg0KDQpgYGB7cn0NCmdncGxvdChkYXRhLCBhZXMoeCA9IHJlbGVhc2VfeWVhcikpICsNCiAgZ2VvbV9oaXN0b2dyYW0oYmlucyA9IDEwKSArDQogIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KG4gPSAxMCkpICsNCiAgbGFicyh4ID0gIlJlbGVhc2UgWWVhciIsIHkgPSAiTnVtYmVyIG9mIG1vdmllcyIsIHRpdGxlID0gIkRpc3RyaWJ1dGlvbiBvZiByZWxlYXNlIHllYXIiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGANCg0KIyMjIE51bWJlciBvZiBmYWNlcw0KDQpgYGB7cn0NCmdncGxvdChkYXRhLCBhZXMoeCA9IG5iX2ZhY2VzKSkgKw0KICBnZW9tX2hpc3RvZ3JhbSgpICsNCiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSkgKw0KICBsYWJzKHggPSAiTnVtYmVyIG9mIGZhY2VzIiwgeSA9ICJOdW1iZXIgb2YgbW92aWVzIiwgdGl0bGUgPSAiRGlzdHJpYnV0aW9uIG9mIG51bWJlciBvZiBmYWNlcyBpbiB0aGUgbW92aWUgcG9zdGVyIikgKw0KICB0aGVtZV9wdWJyKCkgKw0KICB0aGVtZV9sb3goKQ0KYGBgDQoNCiMjIyBEdXJhdGlvbg0KDQpgYGB7cn0NCmdncGxvdChkYXRhLCBhZXMoeCA9IGR1cmF0aW9uKSkgKw0KICBnZW9tX2JveHBsb3QoKSArDQogIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCkpICsNCiAgbGFicyh4ID0gIkR1cmF0aW9uIiwgdGl0bGUgPSAiQm94cGxvdCBvZiBtb3ZpZSBkdXJhdGlvbiIpICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkgKw0KICB0aGVtZShheGlzLnRpY2tzLnkgPSBlbGVtZW50X2JsYW5rKCksIGF4aXMudGV4dC55ID0gZWxlbWVudF9ibGFuaygpKQ0KYGBgDQoNCiMjIEJpdmFyaWF0ZSBkaXN0cmlidXRpb25zDQoNCiMjIyAkXHRleHR7TW92aWUgYnVkZ2V0c30gXHNpbSB5JA0KDQpgYGB7cn0NCmdncGxvdChkYXRhLCBhZXMoeCA9IG1vdmllX2J1ZGdldCwgeSA9IGltZGJfc2NvcmUpKSArDQogIGdlb21fcG9pbnQoKSArDQogIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWwgPSBtb3ZpZV90aXRsZSksIHNpemUgPSAzLCBtYXgub3ZlcmxhcHMgPSA1LCBudWRnZV95ID0gMC41KSArDQogIHNjYWxlX3hfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCksIGxhYmVscyA9IGxhYmVsX2RvbGxhcihzY2FsZV9jdXQgPSBjdXRfc2hvcnRfc2NhbGUoKSkpICsNCiAgbGFicyh4ID0gIk1vdmllIGJ1ZGdldCIsIHkgPSAiSU1EYiBTY29yZSIsIHRpdGxlID0gIk1vdmllIGJ1ZGdldCBhbmQgSU1EYiBzY29yZSIpICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkNCmBgYA0KDQojIyMgJFx0ZXh0e0R1cmF0aW9ufSBcc2ltIHkkDQoNCmBgYHtyfQ0KZ2dwbG90KGRhdGEsIGFlcyh4ID0gZHVyYXRpb24sIHkgPSBpbWRiX3Njb3JlKSkgKw0KICBnZW9tX3BvaW50KCkgKw0KICBnZW9tX3RleHRfcmVwZWwoYWVzKGxhYmVsID0gbW92aWVfdGl0bGUpLCBzaXplID0gMywgbWF4Lm92ZXJsYXBzID0gMTAsIG51ZGdlX3kgPSAwLjUpICsNCiAgc2NhbGVfeF9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGFiZWxzID0gbGFiZWxfbnVtYmVyKCkpICsNCiAgbGFicyh4ID0gIkR1cmF0aW9uIiwgeSA9ICJJTURiIFNjb3JlIiwgdGl0bGUgPSAiTW92aWUgZHVyYXRpb24gYW5kIElNRGIgc2NvcmUiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGANCg0KIyMjICRcdGV4dHtHZW5yZX0gXHNpbSB5JA0KDQpgYGB7cn0NCmRhdGEgJT4lDQogIHNlbGVjdChtb3ZpZV9pZCwgaW1kYl9zY29yZSwgYWN0aW9uOmNyaW1lKSAlPiUNCiAgcGl2b3RfbG9uZ2VyKGNvbHMgPSBjKC1pbWRiX3Njb3JlLCAtbW92aWVfaWQpLCBuYW1lc190byA9ICJnZW5yZSIpICU+JQ0KICBtdXRhdGUoZ2VucmUgPSBzdHJfdG9fc2VudGVuY2UoZ2VucmUpKSAlPiUNCiAgZ3JvdXBfYnkoZ2VucmUpICU+JQ0KICBmaWx0ZXIodmFsdWUgPT0gMSkgJT4lDQogIHN1bW1hcmlzZShhdmdfc2NvcmUgPSBtZWFuKGltZGJfc2NvcmUpLCBudW1fbW92aWVzID0gbigpKSAlPiUNCiAgZ2dwbG90KGFlcyh4ID0gZ2VucmUsIHkgPSBhdmdfc2NvcmUsIGZpbGwgPSBnZW5yZSkpICsNCiAgZ2VvbV9jb2woKSArDQogIGdlb21fdGV4dF9yZXBlbChhZXMoeSA9IGF2Z19zY29yZSwgbGFiZWwgPSBudW1fbW92aWVzKSwgbnVkZ2VfeSA9IDAuMSkgKw0KICBzY2FsZV9maWxsX3RhYmxlYXUocGFsZXR0ZSA9ICJUYWJsZWF1IDIwIikgKw0KICBzY2FsZV95X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpLCBsaW1pdHMgPSBjKDAsIDEwKSkgKw0KICBndWlkZXMoZmlsbCA9ICJub25lIikgKw0KICBsYWJzKHggPSAiR2VucmUiLCB5ID0gIkF2ZXJhZ2UgSU1EYiBTY29yZSIsIHRpdGxlID0gIkF2ZXJhZ2UgSU1EYiBzY29yZSBieSBnZW5yZSIpICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkgKw0KICB0aGVtZShwYW5lbC5ncmlkLm1ham9yLnggPSBlbGVtZW50X2JsYW5rKCkpDQpgYGANCg0KYGBge3IgZmlnLndpZHRoID0gMTB9DQpkYXRhICU+JQ0KICBzZWxlY3QobW92aWVfaWQsIG1vdmllX3RpdGxlLCBpbWRiX3Njb3JlLCBhY3Rpb246Y3JpbWUpICU+JQ0KICBwaXZvdF9sb25nZXIoY29scyA9IGMoLWltZGJfc2NvcmUsIC1tb3ZpZV9pZCwgLW1vdmllX3RpdGxlKSwgbmFtZXNfdG8gPSAiZ2VucmUiKSAlPiUNCiAgbXV0YXRlKGdlbnJlID0gc3RyX3RvX3NlbnRlbmNlKGdlbnJlKSkgJT4lDQogIGdyb3VwX2J5KGdlbnJlKSAlPiUNCiAgZmlsdGVyKHZhbHVlID09IDEpICU+JQ0KICBnZ3Bsb3QoYWVzKHggPSBnZW5yZSwgeSA9IGltZGJfc2NvcmUsIGZpbGwgPSBnZW5yZSkpICsNCiAgZ2VvbV9ib3hwbG90KCkgKw0KICBzY2FsZV9maWxsX3RhYmxlYXUocGFsZXR0ZSA9ICJUYWJsZWF1IDIwIikgKw0KICBzY2FsZV95X2NvbnRpbnVvdXMoYnJlYWtzID0gYnJlYWtzX3ByZXR0eSgpLCBsaW1pdHMgPSBjKDAsIDEwKSkgKw0KICBndWlkZXMoZmlsbCA9ICJub25lIikgKw0KICBsYWJzKHggPSAiR2VucmUiLCB5ID0gIklNRGIgU2NvcmUiLCB0aXRsZSA9ICJCb3hwbG90IG9mIElNRGIgc2NvcmUgYnkgZ2VucmUiLCBjYXB0aW9uID0gIk1vdmllcyBzcGFuIGFjcm9zcyBnZW5yZXMiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGANCg0KIyMjICRcdGV4dHtSZWxlYXNlIE1vbnRofSBcc2ltIHkkDQoNCmBgYHtyfQ0KZGF0YSAlPiUNCiAgbXV0YXRlKHJlbGVhc2VfZGF0ZSA9IGRteShzdHJfYyhyZWxlYXNlX2RheSwgcmVsZWFzZV9tb250aCwgcmVsZWFzZV95ZWFyLCBzZXAgPSAiLSIpKSkgJT4lDQogIG11dGF0ZShyZWxlYXNlX21vbnRoID0gbW9udGgocmVsZWFzZV9kYXRlLCBsYWJlbCA9IFRSVUUpKSAlPiUNCiAgZ2dwbG90KGFlcyh4ID0gcmVsZWFzZV9tb250aCwgeSA9IGltZGJfc2NvcmUsIGZpbGwgPSByZWxlYXNlX21vbnRoKSkgKw0KICBnZW9tX2JveHBsb3Qob3V0bGllci5zaXplID0gMykgKw0KICBnZW9tX3RleHRfcmVwZWwoYWVzKGxhYmVsID0gbW92aWVfdGl0bGUpLCBtYXgub3ZlcmxhcHMgPSA1KSArDQogIHNjYWxlX2ZpbGxfdGFibGVhdShwYWxldHRlID0gIlRhYmxlYXUgMjAiKSArDQogIHNjYWxlX3lfY29udGludW91cyhicmVha3MgPSBicmVha3NfcHJldHR5KCksIGxpbWl0cyA9IGMoMCwgMTApKSArDQogIGd1aWRlcyhmaWxsID0gIm5vbmUiKSArDQogIGxhYnMoeCA9ICJSZWxlYXNlIE1vbnRoIiwgeSA9ICJJTURiIFNjb3JlIiwgdGl0bGUgPSAiQm94cGxvdCBvZiBJTURiIHNjb3JlIGJ5IHJlbGVhc2UgbW9udGgiKSArDQogIHRoZW1lX3B1YnIoKSArDQogIHRoZW1lX2xveCgpDQpgYGANCg0KIyMjICRcdGV4dHtBY3RvciAxfSBcc2ltIHkkDQoNCmBgYHtyIGZpZy53aWR0aCA9IDEyLCBmaWcuaGVpZ2h0ID0gOH0NCmRhdGEgJT4lDQogIGZpbHRlcihhY3RvcjEgJWluJSAoDQogICAgZGF0YSAlPiUNCiAgICAgIGdyb3VwX2J5KGFjdG9yMSkgJT4lDQogICAgICBjb3VudChzb3J0ID0gVFJVRSkgJT4lDQogICAgICBoZWFkKDEwKQ0KICApJGFjdG9yMSkgJT4lDQogIGdncGxvdChhZXMoDQogICAgeCA9IGZjdF9yZW9yZGVyKGFjdG9yMSwgaW1kYl9zY29yZSwgLmZ1biA9IG1lZGlhbiksDQogICAgeSA9IGltZGJfc2NvcmUsDQogICAgZmlsbCA9IGFjdG9yMQ0KICApKSArDQogIGdlb21fYm94cGxvdChvdXRsaWVyLnNpemUgPSAzKSArDQogIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWwgPSBtb3ZpZV90aXRsZSksIG1heC5vdmVybGFwcyA9IDcpICsNCiAgc2NhbGVfZmlsbF90YWJsZWF1KHBhbGV0dGUgPSAiVGFibGVhdSAyMCIpICsNCiAgc2NhbGVfeV9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGltaXRzID0gYygwLCAxMCkpICsNCiAgZ3VpZGVzKGZpbGwgPSAibm9uZSIpICsNCiAgbGFicygNCiAgICB4ID0gIkFjdG9yIDEgTmFtZSIsDQogICAgeSA9ICJJTURiIFNjb3JlIiwNCiAgICB0aXRsZSA9ICJCb3hwbG90IG9mIElNRGIgc2NvcmUgYnkgQWN0b3IgMSIsDQogICAgc3VidGl0bGUgPSAiVG9wIDEwIGFjdG9ycyBieSBudW1iZXIgb2YgbW92aWVzIHNob3duIg0KICApICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkgKw0KICBjb29yZF9mbGlwKCkNCg0KYGBgDQoNCiMjIyAkXHRleHR7RGlzdHJpYnV0b3J9IFxzaW0geSQNCg0KYGBge3IgZmlnLndpZHRoID0gMTIsIGZpZy5oZWlnaHQ9OH0NCmRhdGEgJT4lDQogIGZpbHRlcihkaXN0cmlidXRvciAlaW4lDQogICAgICAgICAgIChkYXRhICU+JQ0KICAgICAgICAgICAgICBncm91cF9ieShkaXN0cmlidXRvcikgJT4lDQogICAgICAgICAgICAgIGNvdW50KHNvcnQgPSBUUlVFKSAlPiUNCiAgICAgICAgICAgICAgaGVhZCgxMCkpJGRpc3RyaWJ1dG9yKSAlPiUNCiAgZ2dwbG90KGFlcyh4ID0gZGlzdHJpYnV0b3IsIHkgPSBpbWRiX3Njb3JlLCBmaWxsID0gZGlzdHJpYnV0b3IpKSArDQogIGdlb21fYm94cGxvdChvdXRsaWVyLnNpemUgPSAzKSArDQogIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWwgPSBtb3ZpZV90aXRsZSksIG1heC5vdmVybGFwcyA9IDUpICsNCiAgc2NhbGVfZmlsbF90YWJsZWF1KHBhbGV0dGUgPSAiVGFibGVhdSAyMCIpICsNCiAgc2NhbGVfeV9jb250aW51b3VzKGJyZWFrcyA9IGJyZWFrc19wcmV0dHkoKSwgbGltaXRzID0gYygwLCAxMCkpICsNCiAgZ3VpZGVzKGZpbGwgPSAibm9uZSIpICsNCiAgbGFicygNCiAgICB4ID0gIkRpc3RyaWJ1dG9yIiwNCiAgICB5ID0gIklNRGIgU2NvcmUiLA0KICAgIHRpdGxlID0gIkJveHBsb3Qgb2YgSU1EYiBzY29yZSBieSBkaXN0cmlidXRvciIsDQogICAgc3VidGl0bGUgPSAiVG9wIDEwIGRpc3RyaWJ1dG9ycyBieSBudW1iZXIgb2YgbW92aWVzIHNob3duIg0KICApICsNCiAgdGhlbWVfcHVicigpICsNCiAgdGhlbWVfbG94KCkgKw0KICBjb29yZF9mbGlwKCkNCiAgDQpgYGANCg0KIyBEYXRhIHByZXByb2Nlc3NpbmcNCg0KIyMgQ2hlY2tpbmcgZGF0YSB0eXBlcw0KDQpgYGB7cn0NCmRhdGEgJT4lIHN0cigpDQpgYGANCg0KYGBge3J9DQpkYXRhIDwtIGRhdGEgJT4lDQogIG11dGF0ZShhY3Jvc3MoLmNvbHMgPSBjKCdsYW5ndWFnZScsICdjb3VudHJ5JywgJ21hdHVyaXR5X3JhdGluZycsICdhc3BlY3RfcmF0aW8nLCAnZGlzdHJpYnV0b3InLCAnZGlyZWN0b3InLCAnY29sb3VyX2ZpbG0nLCAnY2luZW1hdG9ncmFwaGVyJywgJ3Byb2R1Y3Rpb25fY29tcGFueScpLCB+ZmFjdG9yKC54KSkpDQpgYGANCg0KIyMgQ2hlY2tpbmcgZm9yIG11bHRpY29sbGluZWFyaXR5DQoNCmBgYHtyfQ0KdmlmX21vZGVsIDwtIGxtKGltZGJfc2NvcmUgfiAuLCBkYXRhID0gKGRhdGEgJT4lIHNlbGVjdCh3aGVyZShpcy5udW1lcmljKSkpKQ0KDQp2aWYodmlmX21vZGVsKQ0KYGBgDQoNCldlIHNlZSB0aGF0IHRoZXJlIGlzIG5vIG11bHRpY29sbGluZWFyaXR5IGFtb25nIHRoZSBudW1lcmljIHZhcmlhYmxlcyBpbiB0aGUgZGF0YXNldC4NCg0KIyMgRmVhdHVyZSBlbmdpbmVlcmluZw0KDQojIyMgQ2hlY2tpbmcgbGV2ZWxzIGZvciBjYXRlZ29yaWNhbCBjb2x1bW5zDQoNCmBgYHtyfQ0KY2F0ZWdvcmljYWxfY29sdW1ucyA8LSBkYXRhICU+JQ0KICBzdW1tYXJpemUoYWNyb3NzKHdoZXJlKGlzLmZhY3RvciksIH5ubGV2ZWxzKC54KSkpICU+JQ0KICBwaXZvdF9sb25nZXIoZXZlcnl0aGluZygpLCBuYW1lc190byA9ICJ2YXJpYWJsZSIsIHZhbHVlc190byA9ICJudW1fbGV2ZWxzIikNCg0KY2F0ZWdvcmljYWxfY29sdW1ucw0KYGBgDQoNCldlIHNlZSB0aGF0IGRpcmVjdG9yLCBjaW5lbWF0b2dyYXBoZXIsIGFuZCBwcm9kdWN0aW9uIGNvbXBhbnkgaGF2ZSBhIGxvdCBvZiB1bmlxdWUgdmFsdWVzLiBBIHByaW9yaSwgd2UgZXhwZWN0IHRvIGRyb3AgdGhlc2UgY29sdW1ucyB3aGVuIGJ1aWxkaW5nIHRoZSBtb2RlbC4NCg0KTGV0IHVzIGNoZWNrIHRoZSBjb3VudHMgZm9yIHRoZSBvdGhlciB2YXJpYWJsZXMNCg0KYGBge3J9DQpjYXRlZ29yaWNhbF9jb2x1bW5zICU+JSANCiAgZmlsdGVyKCF2YXJpYWJsZSAlaW4lIGMoImRpcmVjdG9yIiwgImNpbmVtYXRvZ3JhcGhlciIsICJwcm9kdWN0aW9uX2NvbXBhbnkiKSkgJT4lDQogIHB1bGwodmFyaWFibGUpICU+JQ0KICB3YWxrKA0KICAgIH4gZGF0YSAlPiUNCiAgICAgIGdyb3VwX2J5X2F0KC54KSAlPiUNCiAgICAgIGNvdW50KHNvcnQgPSBUUlVFKSAlPiUNCiAgICAgIHByaW50KCkNCiAgKQ0KICAgIA0KYGBgDQoNCldlIHNlZSB0aGF0Og0KDQotICAgVGhlIGxhbmd1YWdlIGlzIHByaW1hcmlseSAiRW5nbGlzaCINCi0gICBUaGUgY291bnRyeSBpcyBwcmltYXJpbHkgIlVTQSINCg0KVGhlc2UgZmVhdHVyZXMgY2FuIGFsc28gYmUgZHJvcHBlZCB3aGVuIGJ1aWxkaW5nIHRoZSBtb2RlbC4NCg0KRm9yIGRpc3RyaWJ1dG9yIGFuZCBwbG90IGtleXdvcmRzLCB3ZSBjYW4gY3JlYXRlIGJpbmFyeSBmZWF0dXJlcyBmb3IgdGhlIHRvcCAxMCB2YWx1ZXMgYnkgY291bnQuDQoNCiMjIyBUb3AgMTAga2V5d29yZHMNCg0KYGBge3J9DQp0b3BfMTBfa2V5d29yZHMgPC0gZGF0YSAlPiUNCiAgc2VsZWN0KHBsb3Rfa2V5d29yZHMpICU+JQ0KICBzZXBhcmF0ZV9sb25nZXJfZGVsaW0oY29scyA9ICJwbG90X2tleXdvcmRzIiwgZGVsaW0gPSAifCIpICU+JQ0KICBncm91cF9ieShwbG90X2tleXdvcmRzKSAlPiUNCiAgY291bnQoc29ydCA9IFRSVUUpICU+JQ0KICBoZWFkKDEwKQ0KDQpmb3IgKGtleXdvcmQgaW4gdG9wXzEwX2tleXdvcmRzJHBsb3Rfa2V5d29yZHMpIHsNCiAgY29sX25hbWUgPC0gZ2x1ZSgicGxvdF97a2V5d29yZH0iKQ0KICBkYXRhW1tjb2xfbmFtZV1dIDwtDQogICAgYXMuaW50ZWdlcihsYXBwbHkoZGF0YSRwbG90X2tleXdvcmRzLCBmdW5jdGlvbiAoeCkgew0KICAgICAgc3RyX2RldGVjdCh4LCBrZXl3b3JkKQ0KICAgIH0pKQ0KfQ0KYGBgDQoNCiMjIyBUb3AgMTAgZGlzdHJpYnV0b3JzDQoNCmBgYHtyfQ0KdG9wXzEwX2Rpc3RyaWJ1dG9ycyA8LSBkYXRhICU+JQ0KICBzZWxlY3QoZGlzdHJpYnV0b3IpICU+JQ0KICBzZXBhcmF0ZV9sb25nZXJfZGVsaW0oY29scyA9ICJkaXN0cmlidXRvciIsIGRlbGltID0gInwiKSAlPiUNCiAgZ3JvdXBfYnkoZGlzdHJpYnV0b3IpICU+JQ0KICBjb3VudChzb3J0ID0gVFJVRSkgJT4lDQogIGhlYWQoMTApDQoNCmZvciAoZGlzdHJpYnV0b3IgaW4gdG9wXzEwX2Rpc3RyaWJ1dG9ycyRkaXN0cmlidXRvcikgew0KICBjb2xfbmFtZSA8LSBnbHVlKCJkaXN0cmlidXRvcl97ZGlzdHJpYnV0b3J9IikNCiAgZGF0YVtbY29sX25hbWVdXSA8LQ0KICAgIGFzLmludGVnZXIobGFwcGx5KGRhdGEkZGlzdHJpYnV0b3IsIGZ1bmN0aW9uICh4KSB7DQogICAgICBzdHJfZGV0ZWN0KHgsIGRpc3RyaWJ1dG9yKQ0KICAgIH0pKQ0KfQ0KYGBgDQoNCiMjIFJlbW92aW5nIHZhcmlhYmxlcw0KDQpgYGB7cn0NCmNvbHVtbnNfdG9fcmVtb3ZlIDwtDQogIGMoDQogICAgImltZGJfbGluayIsDQogICAgImFjdG9yMSIsDQogICAgImFjdG9yMiIsDQogICAgImFjdG9yMyIsDQogICAgImdlbnJlcyIsDQogICAgInJlbGVhc2VfeWVhciIsDQogICAgImRpcmVjdG9yIiwgDQogICAgImNpbmVtYXRvZ3JhcGhlciIsIA0KICAgICJwcm9kdWN0aW9uX2NvbXBhbnkiLA0KICAgICJsYW5ndWFnZSIsDQogICAgImNvdW50cnkiLA0KICAgICJkaXN0cmlidXRvciIsDQogICAgInBsb3Rfa2V5d29yZHMiDQogICkNCg0KZGF0YSA8LSBkYXRhICU+JSBzZWxlY3QoLWFsbF9vZihjb2x1bW5zX3RvX3JlbW92ZSkpDQpgYGANCg0KYGBge3J9DQpkYXRhICU+JSBoZWFkKCkNCmBgYA0K</div>
 
 
 
@@ -1802,7 +2361,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("final_report.Rmd");
+  window.initializeSourceEmbed("final_code.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>

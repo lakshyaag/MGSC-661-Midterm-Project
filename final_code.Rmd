@@ -1,0 +1,412 @@
+---
+title: "MGSC 661 - Midterm Project"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Importing data
+
+```{r include=FALSE}
+Sys.setlocale("LC_ALL", "C")
+require(visreg)
+require(glue)
+require(car)
+require(lmtest)
+require(splines)
+require(psych)
+require(stargazer)
+require(plm)
+require(ggplot2)
+require(ggtext)
+require(ggpubr)
+require(ggrepel)
+require(ggthemes)
+require(scales)
+require(caTools)
+require(methods)
+require(boot)
+require(tidyverse)
+require(dplyr)
+require(glue)
+
+windowsFonts(Helvetica = "Product Sans")
+```
+
+```{r}
+theme_lox <- function() {
+  theme(
+    panel.grid.major.x = element_line(linewidth = 0.3, colour = "#cbcbcb"),
+    panel.grid.major.y = element_line(linewidth = 0.3, colour = "#cbcbcb"),
+    plot.title = element_markdown(
+      family = "Helvetica",
+      size = 22,
+      face = "bold",
+      color = "#222222"
+    ),
+    plot.subtitle = element_text(
+      family = "Helvetica",
+      size = 16,
+      margin = margin(2, 0, 2, 0)
+    ),
+    plot.caption = element_text(family = "Helvetica", face = "bold"),
+    axis.text = element_text(
+      family = "Helvetica",
+      size = 12,
+      color = "#222222"
+    ),
+    axis.title = element_text(
+      family = "Helvetica",
+      size = 14,
+      color = "#222222"
+    ),
+    legend.text = element_text(family = "Helvetica", size = 12),
+    legend.title = element_text(
+      family = "Helvetica",
+      size = 14,
+      face = "bold"
+    ),
+    legend.position = "right",
+    strip.text = element_text(
+      family = "Helvetica",
+      size = 12,
+      hjust = 0.5
+    )
+  )
+}
+```
+
+```{r}
+data <- read.csv("./IMDB_data_Fall_2023.csv")
+attach(data)
+```
+
+# Exploratory data analysis
+
+```{r paged.print=TRUE}
+head(data)
+summary(data)
+```
+
+### $y = \text{IMDB Score}$
+
+```{r}
+ggplot(data, aes(x = imdb_score)) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = breaks_width(width = 1)) +
+  labs(x = "IMDb Rating", y = "Number of movies", title = "Distribution of ratings") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### Movie budget
+
+```{r}
+ggplot(data, aes(x = movie_budget)) +
+  geom_histogram(bins = 20) +
+  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
+  labs(x = "Movie budget", y = "Number of movies", title = "Distribution of movie budgets") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### Release year
+
+```{r}
+ggplot(data, aes(x = release_year)) +
+  geom_histogram(bins = 10) +
+  scale_x_continuous(breaks = breaks_pretty(n = 10)) +
+  labs(x = "Release Year", y = "Number of movies", title = "Distribution of release year") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### Number of faces
+
+```{r}
+ggplot(data, aes(x = nb_faces)) +
+  geom_histogram() +
+  scale_x_continuous(breaks = breaks_pretty()) +
+  labs(x = "Number of faces", y = "Number of movies", title = "Distribution of number of faces in the movie poster") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### Duration
+
+```{r}
+ggplot(data, aes(x = duration)) +
+  geom_boxplot() +
+  scale_x_continuous(breaks = breaks_pretty()) +
+  labs(x = "Duration", title = "Boxplot of movie duration") +
+  theme_pubr() +
+  theme_lox() +
+  theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())
+```
+
+## Bivariate distributions
+
+### $\text{Movie budgets} \sim y$
+
+```{r}
+ggplot(data, aes(x = movie_budget, y = imdb_score)) +
+  geom_point() +
+  geom_text_repel(aes(label = movie_title), size = 3, max.overlaps = 5, nudge_y = 0.5) +
+  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
+  labs(x = "Movie budget", y = "IMDb Score", title = "Movie budget and IMDb score") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### $\text{Duration} \sim y$
+
+```{r}
+ggplot(data, aes(x = duration, y = imdb_score)) +
+  geom_point() +
+  geom_text_repel(aes(label = movie_title), size = 3, max.overlaps = 10, nudge_y = 0.5) +
+  scale_x_continuous(breaks = breaks_pretty(), labels = label_number()) +
+  labs(x = "Duration", y = "IMDb Score", title = "Movie duration and IMDb score") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### $\text{Genre} \sim y$
+
+```{r}
+data %>%
+  select(movie_id, imdb_score, action:crime) %>%
+  pivot_longer(cols = c(-imdb_score, -movie_id), names_to = "genre") %>%
+  mutate(genre = str_to_sentence(genre)) %>%
+  group_by(genre) %>%
+  filter(value == 1) %>%
+  summarise(avg_score = mean(imdb_score), num_movies = n()) %>%
+  ggplot(aes(x = genre, y = avg_score, fill = genre)) +
+  geom_col() +
+  geom_text_repel(aes(y = avg_score, label = num_movies), nudge_y = 0.1) +
+  scale_fill_tableau(palette = "Tableau 20") +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = "none") +
+  labs(x = "Genre", y = "Average IMDb Score", title = "Average IMDb score by genre") +
+  theme_pubr() +
+  theme_lox() +
+  theme(panel.grid.major.x = element_blank())
+```
+
+```{r fig.width = 10}
+data %>%
+  select(movie_id, movie_title, imdb_score, action:crime) %>%
+  pivot_longer(cols = c(-imdb_score, -movie_id, -movie_title), names_to = "genre") %>%
+  mutate(genre = str_to_sentence(genre)) %>%
+  group_by(genre) %>%
+  filter(value == 1) %>%
+  ggplot(aes(x = genre, y = imdb_score, fill = genre)) +
+  geom_boxplot() +
+  scale_fill_tableau(palette = "Tableau 20") +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = "none") +
+  labs(x = "Genre", y = "IMDb Score", title = "Boxplot of IMDb score by genre", caption = "Movies span across genres") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### $\text{Release Month} \sim y$
+
+```{r}
+data %>%
+  mutate(release_date = dmy(str_c(release_day, release_month, release_year, sep = "-"))) %>%
+  mutate(release_month = month(release_date, label = TRUE)) %>%
+  ggplot(aes(x = release_month, y = imdb_score, fill = release_month)) +
+  geom_boxplot(outlier.size = 3) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 5) +
+  scale_fill_tableau(palette = "Tableau 20") +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = "none") +
+  labs(x = "Release Month", y = "IMDb Score", title = "Boxplot of IMDb score by release month") +
+  theme_pubr() +
+  theme_lox()
+```
+
+### $\text{Actor 1} \sim y$
+
+```{r fig.width = 12, fig.height = 8}
+data %>%
+  filter(actor1 %in% (
+    data %>%
+      group_by(actor1) %>%
+      count(sort = TRUE) %>%
+      head(10)
+  )$actor1) %>%
+  ggplot(aes(
+    x = fct_reorder(actor1, imdb_score, .fun = median),
+    y = imdb_score,
+    fill = actor1
+  )) +
+  geom_boxplot(outlier.size = 3) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 7) +
+  scale_fill_tableau(palette = "Tableau 20") +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = "none") +
+  labs(
+    x = "Actor 1 Name",
+    y = "IMDb Score",
+    title = "Boxplot of IMDb score by Actor 1",
+    subtitle = "Top 10 actors by number of movies shown"
+  ) +
+  theme_pubr() +
+  theme_lox() +
+  coord_flip()
+
+```
+
+### $\text{Distributor} \sim y$
+
+```{r fig.width = 12, fig.height=8}
+data %>%
+  filter(distributor %in%
+           (data %>%
+              group_by(distributor) %>%
+              count(sort = TRUE) %>%
+              head(10))$distributor) %>%
+  ggplot(aes(x = distributor, y = imdb_score, fill = distributor)) +
+  geom_boxplot(outlier.size = 3) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 5) +
+  scale_fill_tableau(palette = "Tableau 20") +
+  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  guides(fill = "none") +
+  labs(
+    x = "Distributor",
+    y = "IMDb Score",
+    title = "Boxplot of IMDb score by distributor",
+    subtitle = "Top 10 distributors by number of movies shown"
+  ) +
+  theme_pubr() +
+  theme_lox() +
+  coord_flip()
+  
+```
+
+# Data preprocessing
+
+## Checking data types
+
+```{r}
+data %>% str()
+```
+
+```{r}
+data <- data %>%
+  mutate(across(.cols = c('language', 'country', 'maturity_rating', 'aspect_ratio', 'distributor', 'director', 'colour_film', 'cinematographer', 'production_company'), ~factor(.x)))
+```
+
+## Checking for multicollinearity
+
+```{r}
+vif_model <- lm(imdb_score ~ ., data = (data %>% select(where(is.numeric))))
+
+vif(vif_model)
+```
+
+We see that there is no multicollinearity among the numeric variables in the dataset.
+
+## Feature engineering
+
+### Checking levels for categorical columns
+
+```{r}
+categorical_columns <- data %>%
+  summarize(across(where(is.factor), ~nlevels(.x))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "num_levels")
+
+categorical_columns
+```
+
+We see that director, cinematographer, and production company have a lot of unique values. A priori, we expect to drop these columns when building the model.
+
+Let us check the counts for the other variables
+
+```{r}
+categorical_columns %>% 
+  filter(!variable %in% c("director", "cinematographer", "production_company")) %>%
+  pull(variable) %>%
+  walk(
+    ~ data %>%
+      group_by_at(.x) %>%
+      count(sort = TRUE) %>%
+      print()
+  )
+    
+```
+
+We see that:
+
+-   The language is primarily "English"
+-   The country is primarily "USA"
+
+These features can also be dropped when building the model.
+
+For distributor and plot keywords, we can create binary features for the top 10 values by count.
+
+### Top 10 keywords
+
+```{r}
+top_10_keywords <- data %>%
+  select(plot_keywords) %>%
+  separate_longer_delim(cols = "plot_keywords", delim = "|") %>%
+  group_by(plot_keywords) %>%
+  count(sort = TRUE) %>%
+  head(10)
+
+for (keyword in top_10_keywords$plot_keywords) {
+  col_name <- glue("plot_{keyword}")
+  data[[col_name]] <-
+    as.integer(lapply(data$plot_keywords, function (x) {
+      str_detect(x, keyword)
+    }))
+}
+```
+
+### Top 10 distributors
+
+```{r}
+top_10_distributors <- data %>%
+  select(distributor) %>%
+  separate_longer_delim(cols = "distributor", delim = "|") %>%
+  group_by(distributor) %>%
+  count(sort = TRUE) %>%
+  head(10)
+
+for (distributor in top_10_distributors$distributor) {
+  col_name <- glue("distributor_{distributor}")
+  data[[col_name]] <-
+    as.integer(lapply(data$distributor, function (x) {
+      str_detect(x, distributor)
+    }))
+}
+```
+
+## Removing variables
+
+```{r}
+columns_to_remove <-
+  c(
+    "imdb_link",
+    "actor1",
+    "actor2",
+    "actor3",
+    "genres",
+    "release_year",
+    "director", 
+    "cinematographer", 
+    "production_company",
+    "language",
+    "country",
+    "distributor",
+    "plot_keywords"
+  )
+
+data <- data %>% select(-all_of(columns_to_remove))
+```
+
+```{r}
+data %>% head()
+```
