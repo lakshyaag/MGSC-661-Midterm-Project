@@ -294,14 +294,14 @@ data %>% str()
 ```
 
 ```{r}
-data <- data %>%
+data_cleaned <- data %>%
   mutate(across(.cols = c('language', 'country', 'maturity_rating', 'aspect_ratio', 'distributor', 'director', 'colour_film', 'cinematographer', 'production_company'), ~factor(.x)))
 ```
 
 ## Checking for multicollinearity
 
 ```{r}
-vif_model <- lm(imdb_score ~ ., data = (data %>% select(where(is.numeric))))
+vif_model <- lm(imdb_score ~ ., data = (data_cleaned %>% select(where(is.numeric))))
 
 vif(vif_model)
 ```
@@ -349,7 +349,7 @@ For distributor and plot keywords, we can create binary features for the top 10 
 ### Top 10 keywords
 
 ```{r}
-top_10_keywords <- data %>%
+top_10_keywords <- data_cleaned %>%
   select(plot_keywords) %>%
   separate_longer_delim(cols = "plot_keywords", delim = "|") %>%
   group_by(plot_keywords) %>%
@@ -358,8 +358,8 @@ top_10_keywords <- data %>%
 
 for (keyword in top_10_keywords$plot_keywords) {
   col_name <- glue("plot_{keyword}")
-  data[[col_name]] <-
-    as.integer(lapply(data$plot_keywords, function (x) {
+  data_cleaned[[col_name]] <-
+    as.integer(lapply(data_cleaned$plot_keywords, function (x) {
       str_detect(x, keyword)
     }))
 }
@@ -368,7 +368,7 @@ for (keyword in top_10_keywords$plot_keywords) {
 ### Top 10 distributors
 
 ```{r}
-top_10_distributors <- data %>%
+top_10_distributors <- data_cleaned %>%
   select(distributor) %>%
   separate_longer_delim(cols = "distributor", delim = "|") %>%
   group_by(distributor) %>%
@@ -377,8 +377,8 @@ top_10_distributors <- data %>%
 
 for (distributor in top_10_distributors$distributor) {
   col_name <- glue("distributor_{distributor}")
-  data[[col_name]] <-
-    as.integer(lapply(data$distributor, function (x) {
+  data_cleaned[[col_name]] <-
+    as.integer(lapply(data_cleaned$distributor, function (x) {
       str_detect(x, distributor)
     }))
 }
@@ -389,6 +389,7 @@ for (distributor in top_10_distributors$distributor) {
 ```{r}
 columns_to_remove <-
   c(
+    "movie_title",
     "imdb_link",
     "actor1",
     "actor2",
@@ -404,9 +405,34 @@ columns_to_remove <-
     "plot_keywords"
   )
 
-data <- data %>% select(-all_of(columns_to_remove))
+data_cleaned <- data_cleaned %>% select(-all_of(columns_to_remove))
 ```
 
 ```{r}
-data %>% head()
+data_cleaned %>% head()
 ```
+
+# Model building
+
+## Linear regression - using all features
+```{r}
+lin_reg_1 <- lm(imdb_score ~ ., data=data_cleaned)
+summary(lin_reg_1)
+residualPlot(lin_reg_1)
+```
+### Checking for outliers
+```{r}
+outlierTest(lin_reg_1)
+```
+```{r}
+outliers <- c(492, 316, 395, 989, 12, 1806, 1581)
+data_cleaned <- data_cleaned[-outliers, ]
+```
+
+### Running the model with outliers removed
+```{r}
+lin_reg_2 <- lm(imdb_score ~ ., data=data_cleaned)
+summary(lin_reg_2)
+residualPlot(lin_reg_2)
+```
+
