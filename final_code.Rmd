@@ -78,12 +78,11 @@ theme_lox <- function() {
 
 ```{r}
 data <- read.csv("./IMDB_data_Fall_2023.csv")
-attach(data)
 ```
 
 # Exploratory data analysis
 
-```{r paged.print=TRUE}
+```{r}
 head(data)
 summary(data)
 ```
@@ -295,8 +294,47 @@ data %>% str()
 
 ```{r}
 data_cleaned <- data %>%
-  mutate(across(.cols = c('language', 'country', 'maturity_rating', 'aspect_ratio', 'distributor', 'director', 'colour_film', 'cinematographer', 'production_company'), ~factor(.x)))
+  mutate(across(
+    .cols = c(
+      'language',
+      'country',
+      'maturity_rating',
+      'aspect_ratio',
+      'distributor',
+      'director',
+      'colour_film',
+      'cinematographer',
+      'production_company'
+    ),
+    ~ factor(.x)
+  ))
+
+data_cleaned <- data_cleaned %>%
+  mutate(release_month = month(fast_strptime(release_month, format = "%b"), label =
+                                 TRUE)) %>%
+  mutate(release_month = factor(release_month, levels = month.abb, ordered = FALSE))
 ```
+
+
+## Standardizing numerical columns
+```{r}
+data_cleaned <- data_cleaned %>%
+  mutate(across(
+    .cols = c(
+      "movie_budget",
+      'duration',
+      'nb_news_articles',
+      'actor1_star_meter',
+      'actor2_star_meter',
+      'actor3_star_meter',
+      'nb_faces',
+      'movie_meter_IMDBpro'
+    ),
+    .fns = ~scale(.) %>% as.vector()
+  ))
+```
+
+
 
 ## Checking for multicollinearity
 
@@ -313,7 +351,7 @@ We see that there is no multicollinearity among the numeric variables in the dat
 ### Checking levels for categorical columns
 
 ```{r}
-categorical_columns <- data %>%
+categorical_columns <- data_cleaned %>%
   summarize(across(where(is.factor), ~nlevels(.x))) %>%
   pivot_longer(everything(), names_to = "variable", values_to = "num_levels")
 
@@ -329,7 +367,7 @@ categorical_columns %>%
   filter(!variable %in% c("director", "cinematographer", "production_company")) %>%
   pull(variable) %>%
   walk(
-    ~ data %>%
+    ~ data_cleaned %>%
       group_by_at(.x) %>%
       count(sort = TRUE) %>%
       print()
@@ -341,10 +379,26 @@ We see that:
 
 -   The language is primarily "English"
 -   The country is primarily "USA"
+-   The films are primarily "Color"
 
 These features can also be dropped when building the model.
 
+Further:
+-   The aspect ratios are primarily "2.35" or "1.85"
+-   The maturity ratings are primarily "R", "PG-13" or "PG"
+
+For these features, rows containing values apart from the ones specified above can be lumped into an "Other" category.
+
 For distributor and plot keywords, we can create binary features for the top 10 values by count.
+
+### Lumping factors into "Others"
+```{r}
+data_cleaned <- data_cleaned %>% mutate(
+  aspect_ratio = fct_lump_n(aspect_ratio, n = 2),
+  maturity_rating = fct_lump_n(maturity_rating, n = 3)
+)
+```
+
 
 ### Top 10 keywords
 
@@ -389,6 +443,7 @@ for (distributor in top_10_distributors$distributor) {
 ```{r}
 columns_to_remove <-
   c(
+    "movie_id",
     "movie_title",
     "imdb_link",
     "actor1",
@@ -396,6 +451,7 @@ columns_to_remove <-
     "actor3",
     "genres",
     "release_year",
+    "colour_film",
     "director", 
     "cinematographer", 
     "production_company",
@@ -414,7 +470,7 @@ data_cleaned %>% head()
 
 # Model building
 
-## Linear regression - using all features
+## Basic linear regression - using all features
 ```{r}
 lin_reg_1 <- lm(imdb_score ~ ., data=data_cleaned)
 summary(lin_reg_1)
@@ -425,7 +481,7 @@ residualPlot(lin_reg_1)
 outlierTest(lin_reg_1)
 ```
 ```{r}
-outliers <- c(492, 316, 395, 989, 12, 1806, 1581)
+outliers <- c(492, 316, 395, 989, 12, 1581)
 data_cleaned <- data_cleaned[-outliers, ]
 ```
 
@@ -434,5 +490,40 @@ data_cleaned <- data_cleaned[-outliers, ]
 lin_reg_2 <- lm(imdb_score ~ ., data=data_cleaned)
 summary(lin_reg_2)
 residualPlot(lin_reg_2)
+```
+
+After removing the outliers, we see that the non-linearity has reduced. Let us now check for heteroskedasticity.
+
+### Heteroskedasticity
+```{r}
+ncvTest(lin_reg_2)
+```
+
+Since the model contains heteroskedasticity, we can check the corrected coefficients.
+```{r}
+coeftest(lin_reg_2, vcov = vcovHC(lin_reg_2, type = "HC1"))
+```
+
+### Performance
+```{r}
+predicted_scores <- predict(lin_reg_2, data_cleaned)
+actual_scores <- data_cleaned$imdb_score
+mse <- mean((actual_scores - predicted_scores)^2)
+mse
+```
+
+## Linear regression - K-fold
+```{r}
+sample <- sample.split(data_cleaned$imdb_score, SplitRatio = 0.7)
+train <- subset(data_cleaned, sample == TRUE)
+test <- subset(data_cleaned, sample == FALSE)
+
+lin_reg_k <- glm(imdb_score ~ ., data = train)
+mse_train_lin_reg_k <- cv.glm(train, lin_reg_k, K = 5)$delta[1]
+
+mse_test_lin_reg_k <- mean((predict(lin_reg_k, test) - test$imdb_score)^2)
+
+print(glue("Training set MSE: {mse_train_lin_reg_k}"))
+print(glue("Test set MSE: {mse_test_lin_reg_k}"))
 ```
 
