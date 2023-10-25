@@ -1049,7 +1049,7 @@ cat("Best Combination:", best_combination, "\n")
 cat("Lowest MSE:", min_mse, "\n")
 
 ```
-Best Combination: 2 4 1 1 1 
+Best Combination: 2 4 1 1
 Lowest MSE: 0.7730379 
 
 Using this combination:
@@ -1093,4 +1093,343 @@ r_squared <- 1 - (model_multivariate5$deviance / model_multivariate5$null.devian
 print(r_squared)
 ```
 This means that adding the categorical variables with help us improve this model.
+```{r}
+outlierTest(spline_model_1)
+```
+```{r}
+outliers <- c(113, 213, 893, 714, 432, 494, 786, 515, 923)
+data_cleaned <- data[-outliers, ]
+```
+
+```{r}
+spline_model_2 <- glm(imdb_score ~
+                               poly(movie_budget,2) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1),
+                               data = data_cleaned)
+summary(spline_model_2)
+set.seed(123)
+cv_results <- cv.glm(data_cleaned, spline_model_2, K = 20)
+mse <- cv_results$delta[1]
+print("mse =")
+print(mse)
+
+r_squared <- 1 - (spline_model_2$deviance / spline_model_2$null.deviance)
+print(r_squared)
+
+residualPlot(spline_model_2)
+```
+
+
+
+
+
+```{r}
+# List of main effects
+predictors <- c("movie_budget", "duration", "nb_news_articles", "movie_meter_IMDBpro")
+
+# Generate all possible interactions (combinations of 2)
+interaction_combinations <- combn(predictors, 2, simplify = TRUE)
+
+# Function to compute cross-validated MSE for a model
+compute_cv_mse <- function(model, data_cleaned) {
+  cv_results <- cv.glm(data_cleaned, model, K = 20)
+  mse <- cv_results$delta[1]
+  return(mse)
+}
+
+# Try each interaction term and store MSE
+results <- list()
+
+for (i in 1:ncol(interaction_combinations)) {
+  
+  interaction_term <- paste(interaction_combinations[,i], collapse = ":")
+  
+  # Add interaction term to the formula
+  formula_str <- paste("imdb_score ~ poly(movie_budget,2) + 
+                       bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
+                       bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
+                       bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) +",
+                       interaction_term)
+  
+  formula_obj <- as.formula(formula_str)
+  
+  # Fit the model with the interaction term
+  model <- glm(formula_obj, data = data_cleaned)
+  
+  # Compute and store cross-validated MSE
+  mse <- compute_cv_mse(model, data_cleaned)
+  
+  results[[interaction_term]] <- mse
+}
+
+# Sort results by MSE
+results_sorted <- results[order(unlist(results))]
+
+results_sorted
+
+
+```
+```{r}
+spline_model_2 <- glm(imdb_score ~
+                               poly(movie_budget,2) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                               duration:movie_meter_IMDBpro,
+                               data = data_cleaned)
+summary(spline_model_2)
+set.seed(123)
+cv_results <- cv.glm(data_cleaned, spline_model_2, K = 20)
+mse <- cv_results$delta[1]
+print("mse =")
+print(mse)
+
+r_squared <- 1 - (spline_model_2$deviance / spline_model_2$null.deviance)
+print(r_squared)
+```
+
+```{r}
+spline_model_3 <- glm(imdb_score ~
+                               poly(movie_budget,2) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                               duration:movie_meter_IMDBpro + action + adventure + thriller + romance + horror + drama + war + animation,
+                               data = data_cleaned)
+summary(spline_model_3)
+set.seed(123)
+cv_results <- cv.glm(data_cleaned, spline_model_3, K = 20)
+mse <- cv_results$delta[1]
+print("mse =")
+print(mse)
+
+r_squared <- 1 - (spline_model_3$deviance / spline_model_3$null.deviance)
+print(r_squared)
+```
+```{r}
+dummy_matrix <- model.matrix(~ release_month - 1, data=data_cleaned)
+
+# Convert the matrix to a data frame and add to the original data
+data_cleaned <- cbind(data_cleaned, as.data.frame(dummy_matrix))
+```
+
+```{r}
+
+
+spline_model_4 <- glm(imdb_score ~
+                               poly(movie_budget,2) + 
+                     bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
+                     bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     duration:movie_meter_IMDBpro + action + adventure + thriller + 
+                     romance + horror + drama + war + animation + release_monthFeb + release_monthApr + release_monthMay + release_monthJul + release_monthAug + release_monthSep ,
+                               data = data_cleaned)
+summary(spline_model_4)
+set.seed(123)
+cv_results <- cv.glm(data_cleaned, spline_model_4, K = 20)
+mse <- cv_results$delta[1]
+print("mse =")
+print(mse)
+
+r_squared <- 1 - (spline_model_4$deviance / spline_model_4$null.deviance)
+print(r_squared)
+```
+
+```{r}
+outlierTest(spline_model_4)
+
+outliers <- c(6)
+data_cleaned2 <- data_cleaned[-outliers, ]
+
+spline_model_4 <- glm(imdb_score ~
+                               poly(movie_budget,2) + 
+                     bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
+                     bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     duration:movie_meter_IMDBpro + action + adventure + thriller + 
+                     romance + horror + drama + war + animation + release_monthFeb + release_monthApr + release_monthMay + release_monthJul + release_monthAug + release_monthSep ,
+                               data = data_cleaned2)
+summary(spline_model_4)
+set.seed(123)
+cv_results <- cv.glm(data_cleaned2, spline_model_4, K = 20)
+mse <- cv_results$delta[1]
+print("mse =")
+print(mse)
+
+r_squared <- 1 - (spline_model_4$deviance / spline_model_4$null.deviance)
+print(r_squared)
+```
+
+
+
+
+
+
+
+```{r}
+library(boot) # for cv.glm
+
+# New base model formula
+base_formula_str <- "imdb_score ~ poly(movie_budget,2) + 
+                     bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
+                     bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     duration:movie_meter_IMDBpro + action + adventure + thriller + 
+                     romance + horror + drama + war + animation"
+
+# List of dummy variables for release_month
+release_month_dummies <- c("release_monthJan", "release_monthFeb", "release_monthMar", 
+                           "release_monthApr", "release_monthMay", "release_monthJun", 
+                           "release_monthJul", "release_monthAug", "release_monthSep", 
+                           "release_monthOct", "release_monthNov", "release_monthDec")
+
+# Function to compute cross-validated MSE for a formula remains the same
+
+# Initialize variables to keep track of best formula and its MSE
+best_formula <- ""
+lowest_mse <- Inf
+
+# Loop through all possible combinations of the release_month dummy variables
+for (i in 1:length(release_month_dummies)) {
+  combinations <- combn(release_month_dummies, i)
+  
+  for (j in 1:ncol(combinations)) {
+    # Create formula with current combination of release_month dummy variables
+    formula_str <- paste(base_formula_str, "+", paste(combinations[,j], collapse = " + "))
+    
+    # Compute cross-validated MSE for current formula
+    mse <- compute_cv_mse(formula_str, data_cleaned)
+    
+    # Update best formula and lowest MSE if current MSE is lower
+    if (mse < lowest_mse) {
+      best_formula <- formula_str
+      lowest_mse <- mse
+    }
+  }
+}
+
+# Output best formula and its MSE
+cat("Best formula:", "\n", best_formula, "\n")
+cat("Lowest MSE:", lowest_mse, "\n")
+
+```
+
+
+```{r}
+# Base model formula
+base_formula_str <- "imdb_score ~ poly(movie_budget,2) + 
+                     bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
+                     bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     duration:movie_meter_IMDBpro"
+
+# List of categorical variables
+categorical_vars <- c("action", "adventure", "scifi", "thriller", "musical",
+                      "romance", "western", "sport", "horror", "drama", "war", 
+                      "animation", "crime")
+
+# Function to compute cross-validated MSE for a formula
+compute_cv_mse <- function(formula_str, data) {
+  model <- glm(as.formula(formula_str), data = data)
+  cv_results <- cv.glm(data, model, K = 20)
+  mse <- cv_results$delta[1]
+  return(mse)
+}
+
+# Initialize variables to keep track of best formula and its MSE
+best_formula <- ""
+lowest_mse <- Inf
+
+# Loop through all possible combinations of the categorical variables
+for (i in 1:length(categorical_vars)) {
+  combinations <- combn(categorical_vars, i)
+  
+  for (j in 1:ncol(combinations)) {
+    # Create formula with current combination of categorical variables
+    formula_str <- paste(base_formula_str, "+", paste(combinations[,j], collapse = " + "))
+    
+    # Compute cross-validated MSE for current formula
+    mse <- compute_cv_mse(formula_str, data_cleaned)
+    
+    # Update best formula and lowest MSE if current MSE is lower
+    if (mse < lowest_mse) {
+      best_formula <- formula_str
+      lowest_mse <- mse
+    }
+  }
+}
+
+# Output best formula and its MSE
+cat("Best formula:", "\n", best_formula, "\n")
+cat("Lowest MSE:", lowest_mse, "\n")
+
+```
+
+
+
+
+```{r}
+
+model_genre <- lm(imdb_score ~ action + adventure + scifi + thriller + musical + 
+                  romance + western + sport + horror + drama + war + animation + crime, 
+                  data = data)
+
+summary(model_genre)
+```
+
+
+```{r}
+models <- list()
+
+for(degree in 1:10) {
+  models[[degree]] <- glm(imdb_score ~ poly(actor3_star_meter, degree,raw=TRUE), data=data_cleaned)
+}
+
+# Base plot with scatter
+base_plot <- ggplot(data, aes(x=actor3_star_meter, y=imdb_score)) + 
+  geom_point(color = "grey", alpha = 0.5)
+
+# Generate and store plots in a list
+plots <- list()
+
+for(degree in 1:10) {
+  pred_data <- data.frame(actor3_star_meter = data$actor3_star_meter, 
+                          predicted = predict(models[[degree]], data))
+  
+  plots[[degree]] <- base_plot + 
+    geom_line(data = pred_data, aes(x = actor3_star_meter, y = predicted, color = as.character(degree))) +
+    scale_color_identity(guide = 'none') + 
+    ggtitle(paste("Degree:", degree))
+  
+  summary(models[[degree]])
+}
+
+# Display plots in batches of 5 each
+library(gridExtra)
+
+# Display the first 5 plots
+grid.arrange(grobs = plots[1:5], ncol=3)
+
+# Display the next 5 plots
+grid.arrange(grobs = plots[6:10], ncol=3)
+
+# ANOVA test to compare all the models
+anova_results <- do.call("anova", models)
+print(anova_results)
+
+# K-fold cross-validation for each model using glm
+library(boot)
+
+mse_kfold = rep(NA,10) # Running 10 tests
+
+for (d in 1:10){
+  fit_kfold <- glm(imdb_score ~ poly(actor3_star_meter, d, raw=TRUE), data = data)
+  mse_kfold[d] = cv.glm(data, fit_kfold, K=5)$delta[1]
+}
+
+# Print the MSE for each polynomial degree
+print(mse_kfold)
+```
 

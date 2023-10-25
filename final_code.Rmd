@@ -575,3 +575,60 @@ mse_poly_k_fold_df[which.min(mse_poly_k_fold_df$mse), ]
 
 ## Spline regression
 
+First spline model
+```{r}
+spline_model_1 <- glm(imdb_score ~
+                               poly(movie_budget,2) +
+                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
+                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) +
+                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1),
+                               data = data)
+summary(spline_model_1)
+set.seed(123)
+cv_results <- cv.glm(data, spline_model_1, K = 20)
+mse <- cv_results$delta[1]
+print(mse)
+
+r_squared <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
+print(r_squared)
+
+```
+Changes made to the data:
+```{r}
+outlierTest(spline_model_1)
+# added 6 after another test mid-buidling
+outliers <- c(113, 213, 893, 714, 432, 494, 786, 515, 923, 6)
+data_cleaned <- data[-outliers, ]
+
+dummy_matrix <- model.matrix(~ release_month - 1, data=data_cleaned)
+
+# Convert the matrix to a data frame and add to the original data
+data_cleaned <- cbind(data_cleaned, as.data.frame(dummy_matrix))
+```
+
+
+# Advanced spline model with some categorical variables
+Using loops to find combination of predictors with lowest mse
+Note: release_month can be removed, the MSE loss in small (~0.02)
+MSE = 0.5399608
+Rsquare = 0.4860416
+```{r}
+spline_model_4 <- glm(imdb_score ~
+                               poly(movie_budget,2) + 
+                     bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
+                     bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
+                     duration:movie_meter_IMDBpro + action + adventure + thriller + 
+                     romance + horror + drama + war + animation + release_monthFeb + release_monthApr + release_monthMay + release_monthJul + release_monthAug + release_monthSep ,
+                               data = data_cleaned)
+summary(spline_model_4)
+set.seed(123)
+cv_results <- cv.glm(data_cleaned, spline_model_4, K = 20)
+mse <- cv_results$delta[1]
+print("mse =")
+print(mse)
+
+r_squared <- 1 - (spline_model_4$deviance / spline_model_4$null.deviance)
+print(r_squared)
+```
+
