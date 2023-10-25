@@ -5,7 +5,7 @@ output:
   html_notebook: default
 ---
 
-# Importing data
+# Importing libraries and data
 
 ```{r include=FALSE}
 Sys.setlocale("LC_ALL", "C")
@@ -31,6 +31,7 @@ require(dplyr)
 require(glue)
 
 windowsFonts(Helvetica = "Product Sans")
+set.seed(420)
 ```
 
 ```{r}
@@ -335,7 +336,6 @@ data_cleaned <- data_cleaned %>%
 ```
 
 
-
 ## Checking for multicollinearity
 
 ```{r}
@@ -394,8 +394,8 @@ For distributor and plot keywords, we can create binary features for the top 10 
 ### Lumping factors into "Others"
 ```{r}
 data_cleaned <- data_cleaned %>% mutate(
-  aspect_ratio = fct_lump_n(aspect_ratio, n = 2),
-  maturity_rating = fct_lump_n(maturity_rating, n = 3)
+  aspect_ratio = fct_lump_n(aspect_ratio, n = 3),
+  maturity_rating = fct_lump_n(maturity_rating, n = 4)
 )
 ```
 
@@ -419,17 +419,17 @@ for (keyword in top_10_keywords$plot_keywords) {
 }
 ```
 
-### Top 10 distributors
+### Top 5 distributors
 
 ```{r}
-top_10_distributors <- data_cleaned %>%
+top_5_distributors <- data_cleaned %>%
   select(distributor) %>%
   separate_longer_delim(cols = "distributor", delim = "|") %>%
   group_by(distributor) %>%
   count(sort = TRUE) %>%
-  head(10)
+  head(5)
 
-for (distributor in top_10_distributors$distributor) {
+for (distributor in top_5_distributors$distributor) {
   col_name <- glue("distributor_{distributor}")
   data_cleaned[[col_name]] <-
     as.integer(lapply(data_cleaned$distributor, function (x) {
@@ -481,8 +481,8 @@ residualPlot(lin_reg_1)
 outlierTest(lin_reg_1)
 ```
 ```{r}
-outliers <- c(492, 316, 395, 989, 12, 1581)
-data_cleaned <- data_cleaned[-outliers, ]
+outliers <- names(outlierTest(lin_reg_1)[[1]])
+data_cleaned <- data_cleaned %>% filter(!row_number() %in% outliers)
 ```
 
 ### Running the model with outliers removed
@@ -525,5 +525,53 @@ mse_test_lin_reg_k <- mean((predict(lin_reg_k, test) - test$imdb_score)^2)
 
 print(glue("Training set MSE: {mse_train_lin_reg_k}"))
 print(glue("Test set MSE: {mse_test_lin_reg_k}"))
+
+summary(lin_reg_k)
 ```
+
+
+## Polynomial regression
+
+Before running a polynomial regression, let us check the linearity of predictors in the linear regression model
+```{r}
+residualPlots(lin_reg_k, terms= ~ movie_budget + duration + nb_news_articles + movie_meter_IMDBpro)
+```
+
+```{r}
+poly_k_fold_mse <- function(d1, d2, d3, d4, k) {
+  poly_k_fold <- glm(imdb_score ~ poly(movie_budget, d1) + poly(duration, d2) + poly(nb_news_articles, d3) + poly(movie_meter_IMDBpro, d4) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro, data = data_cleaned)
+  
+  mse_k_fold <- cv.glm(data_cleaned, poly_k_fold, K = k)$delta[1]
+  print(glue("MSE for degrees ({d1}, {d2}, {d3}, {d4}) on {k}-fold CV: {mse_k_fold}"))
+  mse_k_fold
+}
+```
+
+
+### Finding the optimal degree for numeric features using K-fold CV
+```{r}
+mse_poly_k_fold_df = data.frame(
+  i = rep(NA, 4 ^ 4),
+  j = rep(NA, 4 ^ 4),
+  k = rep(NA, 4 ^ 4),
+  l = rep(NA, 4 ^ 4),
+  mse = rep(NA, 4 ^ 4)
+)
+for (i in 2:5) {
+  for (j in 2:5) {
+    for (k in 2:5) {
+      for (l in 2:5) {
+        mse_poly_k_fold_df[nrow(mse_poly_k_fold_df) + 1, ] <-
+          c(i, j, k, l, poly_k_fold_mse(i, j, k, l, 5))
+      }
+    }
+  }
+}
+```
+
+```{r}
+mse_poly_k_fold_df[which.min(mse_poly_k_fold_df$mse), ]
+```
+
+## Spline regression
 
