@@ -331,7 +331,7 @@ data_cleaned <- data_cleaned %>%
       'nb_faces',
       'movie_meter_IMDBpro'
     ),
-    .fns = ~scale(.) %>% as.vector()
+    .fns = ~ scale(.) %>% as.vector()
   ))
 ```
 
@@ -385,7 +385,7 @@ These features can also be dropped when building the model.
 
 Further:
 -   The aspect ratios are primarily "2.35" or "1.85"
--   The maturity ratings are primarily "R", "PG-13" or "PG"
+-   The maturity ratings are primarily "R", "PG-13", "PG" or "G"
 
 For these features, rows containing values apart from the ones specified above can be lumped into an "Other" category.
 
@@ -395,7 +395,7 @@ For distributor and plot keywords, we can create binary features for the top 10 
 ```{r}
 data_cleaned <- data_cleaned %>% mutate(
   aspect_ratio = fct_lump_n(aspect_ratio, n = 3),
-  maturity_rating = fct_lump_n(maturity_rating, n = 4)
+  maturity_rating = fct_lump_n(maturity_rating, n = 5)
 )
 ```
 
@@ -572,63 +572,150 @@ for (i in 2:5) {
 ```{r}
 mse_poly_k_fold_df[which.min(mse_poly_k_fold_df$mse), ]
 ```
+### Polynomial regression model with optimal degrees 
+```{r}
+poly_k_fold <- glm(imdb_score ~ poly(movie_budget, 3) + poly(duration, 2) + poly(nb_news_articles, 5) + poly(movie_meter_IMDBpro, 5) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro, data = data_cleaned)
+```
+
 
 ## Spline regression
-
-First spline model
 ```{r}
-spline_model_1 <- glm(imdb_score ~
-                               poly(movie_budget,2) +
-                               bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) +
-                               bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) +
-                               bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1),
-                               data = data)
+spline_model_1 <- glm(
+  imdb_score ~
+    poly(movie_budget, 3) +
+    bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 2) +
+    bs(
+      nb_news_articles,
+      knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)),
+      degree = 1
+    ) +
+    bs(
+      movie_meter_IMDBpro,
+      knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)),
+      degree = 1
+    ) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro,
+  data = data_cleaned
+)
 summary(spline_model_1)
-set.seed(123)
-cv_results <- cv.glm(data, spline_model_1, K = 20)
-mse <- cv_results$delta[1]
-print(mse)
+```
 
+
+```{r}
+cv_results <- cv.glm(data_cleaned, spline_model_1, K = 20)
+mse <- cv_results$delta[1]
 r_squared <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
-print(r_squared)
 
-```
-Changes made to the data:
-```{r}
-outlierTest(spline_model_1)
-# added 6 after another test mid-buidling
-outliers <- c(113, 213, 893, 714, 432, 494, 786, 515, 923, 6)
-data_cleaned <- data[-outliers, ]
-
-dummy_matrix <- model.matrix(~ release_month - 1, data=data_cleaned)
-
-# Convert the matrix to a data frame and add to the original data
-data_cleaned <- cbind(data_cleaned, as.data.frame(dummy_matrix))
+print(glue("Spline MSE: {mse}"))
+print(glue("R-squared: {r_squared}"))
 ```
 
-
-# Advanced spline model with some categorical variables
-Using loops to find combination of predictors with lowest mse
-Note: release_month can be removed, the MSE loss in small (~0.02)
-MSE = 0.5399608
-Rsquare = 0.4860416
+# Predicting the ratings
 ```{r}
-spline_model_4 <- glm(imdb_score ~
-                               poly(movie_budget,2) + 
-                     bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 4) + 
-                     bs(nb_news_articles, knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)), degree = 1) + 
-                     bs(movie_meter_IMDBpro, knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)), degree = 1) + 
-                     duration:movie_meter_IMDBpro + action + adventure + thriller + 
-                     romance + horror + drama + war + animation + release_monthFeb + release_monthApr + release_monthMay + release_monthJul + release_monthAug + release_monthSep ,
-                               data = data_cleaned)
-summary(spline_model_4)
-set.seed(123)
-cv_results <- cv.glm(data_cleaned, spline_model_4, K = 20)
-mse <- cv_results$delta[1]
-print("mse =")
-print(mse)
+test_data <- read.csv("./test_data_IMDB_Fall_2023.csv")
+test_data
+```
+## Cleaning test data
+```{r}
+test_data_cleaned <- test_data %>%
+  mutate(across(
+    .cols = c(
+      'language',
+      'country',
+      'maturity_rating',
+      'aspect_ratio',
+      'distributor',
+      'director',
+      'colour_film',
+      'cinematographer',
+      'production_company'
+    ),
+    ~ factor(.x)
+  ))
 
-r_squared <- 1 - (spline_model_4$deviance / spline_model_4$null.deviance)
-print(r_squared)
+test_data_cleaned <- test_data_cleaned %>%
+  mutate(release_month = month(fast_strptime(release_month, format = "%b"), label =
+                                 TRUE)) %>%
+  mutate(release_month = factor(release_month, levels = month.abb, ordered = FALSE))
+```
+
+```{r}
+test_data_cleaned <- test_data_cleaned %>%
+  mutate(movie_budget = as.numeric(str_replace_all(movie_budget, ",", "")))
+```
+
+
+```{r}
+test_data_cleaned <- test_data_cleaned %>%
+  mutate(across(
+    .cols = c(
+      "movie_budget",
+      'duration',
+      'nb_news_articles',
+      'actor1_star_meter',
+      'actor2_star_meter',
+      'actor3_star_meter',
+      'nb_faces',
+      'movie_meter_IMDBpro'
+    ),
+    .fns = ~ scale(.) %>% as.vector()
+  ))
+```
+
+```{r}
+for (keyword in top_10_keywords$plot_keywords) {
+  col_name <- glue("plot_{keyword}")
+  test_data_cleaned[[col_name]] <-
+    as.integer(lapply(test_data_cleaned$plot_keywords, function (x) {
+      str_detect(x, keyword)
+    }))
+}
+
+for (distributor in top_5_distributors$distributor) {
+  col_name <- glue("distributor_{distributor}")
+  test_data_cleaned[[col_name]] <-
+    as.integer(lapply(test_data_cleaned$distributor, function (x) {
+      str_detect(x, distributor)
+    }))
+}
+```
+
+```{r}
+columns_to_remove <-
+  c(
+    "movie_id",
+    "movie_title",
+    "imdb_link",
+    "actor1",
+    "actor2",
+    "actor3",
+    "genres",
+    "release_year",
+    "colour_film",
+    "director", 
+    "cinematographer", 
+    "production_company",
+    "language",
+    "country",
+    "distributor",
+    "plot_keywords"
+  )
+
+test_data_cleaned <- test_data_cleaned %>% select(-all_of(columns_to_remove))
+```
+
+```{r}
+test_data_cleaned
+```
+
+## Predicting
+```{r}
+lin_reg_predict <- as.data.frame(predict(lin_reg_k, test_data_cleaned))
+poly_reg_predict <- as.data.frame(predict(poly_k_fold, test_data_cleaned))
+spline_reg_predict <- as.data.frame(predict(spline_model_1, test_data_cleaned))
+
+predictions <- data.frame(lin_reg_predict, poly_reg_predict, spline_reg_predict)
+names(predictions) <- c("lin_reg", "poly_reg", "spline_reg")
+
+predictions
 ```
 
