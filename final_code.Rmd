@@ -450,6 +450,7 @@ columns_to_remove <-
     "actor2",
     "actor3",
     "genres",
+    "release_day",
     "release_year",
     "colour_film",
     "director", 
@@ -509,7 +510,9 @@ coeftest(lin_reg_2, vcov = vcovHC(lin_reg_2, type = "HC1"))
 predicted_scores <- predict(lin_reg_2, data_cleaned)
 actual_scores <- data_cleaned$imdb_score
 mse <- mean((actual_scores - predicted_scores)^2)
-mse
+rmse <- sqrt(mse)
+print(glue("Linear regression MSE: {mse}"))
+print(glue("Linear regression RMSE: {rmse}"))
 ```
 
 ## Linear regression - K-fold
@@ -520,13 +523,21 @@ test <- subset(data_cleaned, sample == FALSE)
 
 lin_reg_k <- glm(imdb_score ~ ., data = train)
 mse_train_lin_reg_k <- cv.glm(train, lin_reg_k, K = 5)$delta[1]
+rmse_train_lin_reg_k <- sqrt(mse_train_lin_reg_k)
 
 mse_test_lin_reg_k <- mean((predict(lin_reg_k, test) - test$imdb_score)^2)
+rmse_test_lin_reg_k <- sqrt(mse_test_lin_reg_k)
+
 
 print(glue("Training set MSE: {mse_train_lin_reg_k}"))
+print(glue("Training set RMSE: {rmse_train_lin_reg_k}"))
 print(glue("Test set MSE: {mse_test_lin_reg_k}"))
+print(glue("Test set RMSE: {rmse_test_lin_reg_k}"))
+```
 
-summary(lin_reg_k)
+## 
+```{r}
+
 ```
 
 
@@ -575,41 +586,55 @@ mse_poly_k_fold_df[which.min(mse_poly_k_fold_df$mse), ]
 ### Polynomial regression model with optimal degrees 
 ```{r}
 poly_k_fold <- glm(imdb_score ~ poly(movie_budget, 3) + poly(duration, 2) + poly(nb_news_articles, 5) + poly(movie_meter_IMDBpro, 5) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro, data = data_cleaned)
+
+mse_poly_k_fold <- cv.glm(data_cleaned, poly_k_fold, K = 10)$delta[1]
+rmse_poly_k_fold <- sqrt(mse_poly_k_fold)
+print(glue("Polynomial MSE: {mse_poly_k_fold}"))
+print(glue("Polynomial RMSE: {rmse_poly_k_fold}"))
 ```
 
 
 ## Spline regression
+### Building the model
 ```{r}
 spline_model_1 <- glm(
   imdb_score ~
-    poly(movie_budget, 3) +
-    bs(duration, knots = quantile(duration, c(0.25, 0.5, 0.75)), degree = 2) +
+    bs(
+      movie_budget,
+      knots = quantile(data_cleaned$movie_budget, c(0.25, 0.5, 0.75)),
+      degree = 3
+    ) +
+    bs(
+      duration,
+      knots = quantile(data_cleaned$duration, c(0.25, 0.5, 0.75)),
+      degree = 2
+    ) +
     bs(
       nb_news_articles,
-      knots = quantile(nb_news_articles, c(0.25, 0.5, 0.75)),
+      knots = quantile(data_cleaned$nb_news_articles, c(0.25, 0.5, 0.75)),
       degree = 1
     ) +
     bs(
       movie_meter_IMDBpro,
-      knots = quantile(movie_meter_IMDBpro, c(0.25, 0.5, 0.75)),
+      knots = quantile(data_cleaned$movie_meter_IMDBpro, c(0.25, 0.5, 0.75)),
       degree = 1
     ) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro,
   data = data_cleaned
 )
-summary(spline_model_1)
 ```
-
-
+### Running K-fold cross-validation
 ```{r}
-cv_results <- cv.glm(data_cleaned, spline_model_1, K = 20)
+cv_results <- cv.glm(data_cleaned, spline_model_1, K = 10)
 mse <- cv_results$delta[1]
+rmse <- sqrt(mse)
 r_squared <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
 
 print(glue("Spline MSE: {mse}"))
+print(glue("Spline RMSE: {rmse}"))
 print(glue("R-squared: {r_squared}"))
 ```
 
-# Predicting the ratings
+# Using the model
 ```{r}
 test_data <- read.csv("./test_data_IMDB_Fall_2023.csv")
 test_data
@@ -713,9 +738,245 @@ lin_reg_predict <- as.data.frame(predict(lin_reg_k, test_data_cleaned))
 poly_reg_predict <- as.data.frame(predict(poly_k_fold, test_data_cleaned))
 spline_reg_predict <- as.data.frame(predict(spline_model_1, test_data_cleaned))
 
-predictions <- data.frame(lin_reg_predict, poly_reg_predict, spline_reg_predict)
-names(predictions) <- c("lin_reg", "poly_reg", "spline_reg")
+predictions <- data.frame(test_data$movie_title, lin_reg_predict, poly_reg_predict, spline_reg_predict)
+names(predictions) <- c("movie_title", "lin_reg", "poly_reg", "spline_reg")
 
 predictions
+```
+
+# Presenting models
+## Linear regression
+```{r include=FALSE}
+names(lin_reg_2$coefficients) <- c(
+  "Intercept",
+  "Movie Budget",
+  "Released in February",
+  "Released in March",
+  "Released in April",
+  "Released in May",
+  "Released in June",
+  "Released in July",
+  "Released in August",
+  "Released in September",
+  "Released in October",
+  "Released in November",
+  "Released in December",
+  "Duration",
+  "G Rating",
+  "PG Rating",
+  "PG-13 Rating",
+  "R Rating",
+  "Other Maturity Rating",
+  "Aspect Ratio 1.85",
+  "Aspect Ratio 2.35",
+  "Other Aspect Ratio",
+  "News Articles",
+  "Actor 1 Star Meter",
+  "Actor 2 Star Meter",
+  "Actor 3 Star Meter",
+  "Number of Faces in Poster",
+  "Action Genre",
+  "Adventure Genre",
+  "Sci-Fi Genre",
+  "Thriller Genre",
+  "Musical Genre",
+  "Romance Genre",
+  "Western Genre",
+  "Sport Genre",
+  "Horror Genre",
+  "Drama Genre",
+  "War Genre",
+  "Animation Genre",
+  "Crime Genre",
+  "IMDB Pro Meter",
+  "Plot Involves Murder",
+  "Plot Involves Love",
+  "Plot Involves Friends",
+  "Plot Involves Death",
+  "Plot Involves High School",
+  "Plot Involves Police",
+  "Plot Set in New York City",
+  "Plot Involves a Boy",
+  "Plot Involves Drugs",
+  "Plot Involves School",
+  "Distributed by Warner Bros.",
+  "Distributed by Universal Pictures",
+  "Distributed by Paramount Pictures",
+  "Distributed by Twentieth Century Fox",
+  "Distributed by Columbia Pictures Corporation"
+)
+
+# stargazer(lin_reg_2, type = "html", out = "lin_reg.html", dep.var.labels = c("IMDB Score"))
+```
+
+## Polynomial regression
+
+```{r include=FALSE}
+names(poly_k_fold$coefficients) <- c(
+  "Intercept",
+  "Movie Budget",
+  "Movie Budget^2",
+  "Movie Budget^3",
+  "Duration",
+  "Duration^2",
+  "News Articles",
+  "News Articles^2",
+  "News Articles^3",
+  "News Articles^4",
+  "News Articles^5",
+  "IMDB Pro Meter",
+  "IMDB Pro Meter^2",
+  "IMDB Pro Meter^3",
+  "IMDB Pro Meter^4",
+  "IMDB Pro Meter^5",
+  "Released in February",
+  "Released in March",
+  "Released in April",
+  "Released in May",
+  "Released in June",
+  "Released in July",
+  "Released in August",
+  "Released in September",
+  "Released in October",
+  "Released in November",
+  "Released in December",
+  "G Rating",
+  "PG Rating",
+  "PG-13 Rating",
+  "R Rating",
+  "Other Maturity Rating",
+  "Aspect Ratio 1.85",
+  "Aspect Ratio 2.35",
+  "Other Aspect Ratio",
+  "Actor 1 Star Meter",
+  "Actor 2 Star Meter",
+  "Actor 3 Star Meter",
+  "Number of Faces in Poster",
+  "Action Genre",
+  "Adventure Genre",
+  "Sci-Fi Genre",
+  "Thriller Genre",
+  "Musical Genre",
+  "Romance Genre",
+  "Western Genre",
+  "Sport Genre",
+  "Horror Genre",
+  "Drama Genre",
+  "War Genre",
+  "Animation Genre",
+  "Crime Genre",
+  "Plot Involves Murder",
+  "Plot Involves Love",
+  "Plot Involves Friends",
+  "Plot Involves Death",
+  "Plot Involves High School",
+  "Plot Involves Police",
+  "Plot Set in New York City",
+  "Plot Involves a Boy",
+  "Plot Involves Drugs",
+  "Plot Involves School",
+  "Distributed by Warner Bros.",
+  "Distributed by Universal Pictures",
+  "Distributed by Paramount Pictures",
+  "Distributed by Twentieth Century Fox",
+  "Distributed by Columbia Pictures Corporation"
+)
+
+# stargazer(poly_k_fold, type = "html", out = "poly_reg.html", dep.var.labels = c("IMDB Score"))
+```
+
+## Spline regression
+```{r include=FALSE}
+names(spline_model_1$coefficients) <- c(
+  "Intercept",
+  "Movie Budget (B-spline 1)",
+  "Movie Budget (B-spline 2)",
+  "Movie Budget (B-spline 3)",
+  "Movie Budget (B-spline 4)",
+  "Movie Budget (B-spline 5)",
+  "Movie Budget (B-spline 6)",
+  "Duration (B-spline 1)",
+  "Duration (B-spline 2)",
+  "Duration (B-spline 3)",
+  "Duration (B-spline 4)",
+  "Duration (B-spline 5)",
+  "News Articles (B-spline 1)",
+  "News Articles (B-spline 2)",
+  "News Articles (B-spline 3)",
+  "News Articles (B-spline 4)",
+  "IMDB Pro Meter (B-spline 1)",
+  "IMDB Pro Meter (B-spline 2)",
+  "IMDB Pro Meter (B-spline 3)",
+  "IMDB Pro Meter (B-spline 4)",
+  "Released in February",
+  "Released in March",
+  "Released in April",
+  "Released in May",
+  "Released in June",
+  "Released in July",
+  "Released in August",
+  "Released in September",
+  "Released in October",
+  "Released in November",
+  "Released in December",
+  "G Rating",
+  "PG Rating",
+  "PG-13 Rating",
+  "R Rating",
+  "Other Maturity Rating",
+  "Aspect Ratio 1.85",
+  "Aspect Ratio 2.35",
+  "Other Aspect Ratio",
+  "Actor 1 Star Meter",
+  "Actor 2 Star Meter",
+  "Actor 3 Star Meter",
+  "Number of Faces in Poster",
+  "Action Genre",
+  "Adventure Genre",
+  "Sci-Fi Genre",
+  "Thriller Genre",
+  "Musical Genre",
+  "Romance Genre",
+  "Western Genre",
+  "Sport Genre",
+  "Horror Genre",
+  "Drama Genre",
+  "War Genre",
+  "Animation Genre",
+  "Crime Genre",
+  "Plot Involves Murder",
+  "Plot Involves Love",
+  "Plot Involves Friends",
+  "Plot Involves Death",
+  "Plot Involves High School",
+  "Plot Involves Police",
+  "Plot Set in New York City",
+  "Plot Involves a Boy",
+  "Plot Involves Drugs",
+  "Plot Involves School",
+  "Distributed by Warner Bros.",
+  "Distributed by Universal Pictures",
+  "Distributed by Paramount Pictures",
+  "Distributed by Twentieth Century Fox",
+  "Distributed by Columbia Pictures Corporation"
+)
+
+# stargazer(spline_model_1, type = "latex", out = "spline_reg.html", dep.var.labels = c("IMDB Score"))
+```
+
+## All models
+```{r}
+stargazer(
+  lin_reg_2,
+  poly_k_fold,
+  spline_model_1,
+  align = TRUE,
+  model.names = FALSE,
+  type = "latex",
+  dep.var.labels = c("IMDB Score"),
+  column.labels = c("Linear", "Polynomial", "Spline"),
+  digits = 3,
+  out = "overall_reg.html"
+)
 ```
 
