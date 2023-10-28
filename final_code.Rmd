@@ -29,9 +29,10 @@ require(boot)
 require(tidyverse)
 require(dplyr)
 require(glue)
+require(corrplot)
+require(broom)
 
 windowsFonts(Helvetica = "Product Sans")
-set.seed(420)
 ```
 
 ```{r}
@@ -88,111 +89,121 @@ head(data)
 summary(data)
 ```
 
-### $y = \text{IMDB Score}$
+### IMDB Score
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = imdb_score)) +
-  geom_histogram(binwidth = 1) +
+  geom_histogram(binwidth = 1, fill = '#008FD5', color='black') +
+  scale_fill_fivethirtyeight() +
   scale_x_continuous(breaks = breaks_width(width = 1)) +
-  labs(x = "IMDb Rating", y = "Number of movies", title = "Distribution of ratings") +
+  labs(x = "IMDb Score", y = "Number of movies", title = "Distribution of IMDB Score") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/imdb_score.png", device = "png")
 ```
 
 ### Movie budget
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = movie_budget)) +
-  geom_histogram(bins = 20) +
+  geom_histogram(bins = 10, fill = "#008FD5", color = "black") +
   scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
-  labs(x = "Movie budget", y = "Number of movies", title = "Distribution of movie budgets") +
+  labs(x = "Movie budget", y = "Number of movies", title = "Distribution of movie budget1") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/movie_budget.png", device = "png")
 ```
 
 ### Release year
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = release_year)) +
-  geom_histogram(bins = 10) +
+  geom_histogram(bins = 10, fill = "#008FD5", color="black") +
   scale_x_continuous(breaks = breaks_pretty(n = 10)) +
   labs(x = "Release Year", y = "Number of movies", title = "Distribution of release year") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/release_year.png", device = "png")
+```
+
+### Release month
+
+```{r fig.width=15, fig.height=8}
+ggplot(data, aes(x = factor(release_month,levels = month.abb))) +
+  geom_bar(aes(fill = release_month), color = "black") +
+  guides(fill="none") +
+  scale_fill_tableau(palette = "Tableau 20") +
+  labs(x = "Release Month", y = "Number of movies", title = "Number of movies by release month") +
+  theme_pubr() +
+  theme_lox() +
+  theme(panel.grid.major.x = element_blank())
+  
+ggsave(filename = "plots/release_month.png", device = "png")
 ```
 
 ### Number of faces
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = nb_faces)) +
-  geom_histogram() +
+  geom_histogram(bins = 10, fill = "#008FD5", color = "black") +
   scale_x_continuous(breaks = breaks_pretty()) +
   labs(x = "Number of faces", y = "Number of movies", title = "Distribution of number of faces in the movie poster") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/number_faces.png", device = "png")
 ```
 
 ### Duration
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = duration)) +
-  geom_boxplot() +
+  geom_boxplot(outlier.size = 4) +
   scale_x_continuous(breaks = breaks_pretty()) +
   labs(x = "Duration", title = "Boxplot of movie duration") +
   theme_pubr() +
   theme_lox() +
   theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())
+
+ggsave(filename = "plots/duration.png", device = "png")
 ```
 
 ## Bivariate distributions
 
-### $\text{Movie budgets} \sim y$
+### Movie budget ~ IMDB Score
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = movie_budget, y = imdb_score)) +
   geom_point() +
-  geom_text_repel(aes(label = movie_title), size = 3, max.overlaps = 5, nudge_y = 0.5) +
-  scale_x_continuous(breaks = breaks_pretty(), labels = label_dollar(scale_cut = cut_short_scale())) +
+  geom_text_repel(aes(label = movie_title), size = 5, max.overlaps = 2, nudge_y = 0.5) +
+  scale_x_continuous(breaks = breaks_pretty(n=10), labels = label_dollar(scale_cut = cut_short_scale())) +
   labs(x = "Movie budget", y = "IMDb Score", title = "Movie budget and IMDb score") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/movie_budget_imdb_score.png", device = "png")
 ```
 
-### $\text{Duration} \sim y$
+### Duration ~ IMDB Score
 
-```{r}
+```{r fig.width=15, fig.height=8}
 ggplot(data, aes(x = duration, y = imdb_score)) +
   geom_point() +
-  geom_text_repel(aes(label = movie_title), size = 3, max.overlaps = 10, nudge_y = 0.5) +
-  scale_x_continuous(breaks = breaks_pretty(), labels = label_number()) +
+  geom_text_repel(aes(label = movie_title), size = 5, max.overlaps = 3, nudge_y = 0.5) +
+  scale_x_continuous(breaks = breaks_pretty(n=10), labels = label_number()) +
   labs(x = "Duration", y = "IMDb Score", title = "Movie duration and IMDb score") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/duration_imdb_score.png", device = "png")
 ```
 
-### $\text{Genre} \sim y$
+### Genre ~ IMDB Score
 
-```{r}
-data %>%
-  select(movie_id, imdb_score, action:crime) %>%
-  pivot_longer(cols = c(-imdb_score, -movie_id), names_to = "genre") %>%
-  mutate(genre = str_to_sentence(genre)) %>%
-  group_by(genre) %>%
-  filter(value == 1) %>%
-  summarise(avg_score = mean(imdb_score), num_movies = n()) %>%
-  ggplot(aes(x = genre, y = avg_score, fill = genre)) +
-  geom_col() +
-  geom_text_repel(aes(y = avg_score, label = num_movies), nudge_y = 0.1) +
-  scale_fill_tableau(palette = "Tableau 20") +
-  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
-  guides(fill = "none") +
-  labs(x = "Genre", y = "Average IMDb Score", title = "Average IMDb score by genre") +
-  theme_pubr() +
-  theme_lox() +
-  theme(panel.grid.major.x = element_blank())
-```
-
-```{r fig.width = 10}
+```{r fig.width=15, fig.height=8}
 data %>%
   select(movie_id, movie_title, imdb_score, action:crime) %>%
   pivot_longer(cols = c(-imdb_score, -movie_id, -movie_title), names_to = "genre") %>%
@@ -202,33 +213,37 @@ data %>%
   ggplot(aes(x = genre, y = imdb_score, fill = genre)) +
   geom_boxplot() +
   scale_fill_tableau(palette = "Tableau 20") +
-  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  scale_y_continuous(breaks = breaks_pretty(n = 10), limits = c(0, 10)) +
   guides(fill = "none") +
-  labs(x = "Genre", y = "IMDb Score", title = "Boxplot of IMDb score by genre", caption = "Movies span across genres") +
+  labs(x = "Genre", y = "IMDb Score", title = "Boxplot of IMDb score by genre", subtitle = "Movies span across genres") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/genre_imdb_score.png", device = "png")
 ```
 
-### $\text{Release Month} \sim y$
+### Release Month ~ IMDB Score
 
-```{r}
+```{r fig.width=15, fig.height=8}
 data %>%
   mutate(release_date = dmy(str_c(release_day, release_month, release_year, sep = "-"))) %>%
   mutate(release_month = month(release_date, label = TRUE)) %>%
   ggplot(aes(x = release_month, y = imdb_score, fill = release_month)) +
-  geom_boxplot(outlier.size = 3) +
-  geom_text_repel(aes(label = movie_title), max.overlaps = 5) +
+  geom_boxplot(outlier.size = 2) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 3, size = 4) +
   scale_fill_tableau(palette = "Tableau 20") +
-  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  scale_y_continuous(breaks = breaks_pretty(n=10), limits = c(0, 10)) +
   guides(fill = "none") +
   labs(x = "Release Month", y = "IMDb Score", title = "Boxplot of IMDb score by release month") +
   theme_pubr() +
   theme_lox()
+
+ggsave(filename = "plots/release_month_imdb_score.png", device = "png")
 ```
 
-### $\text{Actor 1} \sim y$
+### Actor 1 ~ IMDB Score
 
-```{r fig.width = 12, fig.height = 8}
+```{r fig.width=15, fig.height=8}
 data %>%
   filter(actor1 %in% (
     data %>%
@@ -241,10 +256,10 @@ data %>%
     y = imdb_score,
     fill = actor1
   )) +
-  geom_boxplot(outlier.size = 3) +
-  geom_text_repel(aes(label = movie_title), max.overlaps = 7) +
+  geom_boxplot(outlier.size = 2) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 2, size = 4) +
   scale_fill_tableau(palette = "Tableau 20") +
-  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  scale_y_continuous(breaks = breaks_pretty(n=10), limits = c(0, 10)) +
   guides(fill = "none") +
   labs(
     x = "Actor 1 Name",
@@ -253,14 +268,14 @@ data %>%
     subtitle = "Top 10 actors by number of movies shown"
   ) +
   theme_pubr() +
-  theme_lox() +
-  coord_flip()
+  theme_lox()
 
+ggsave(filename = "plots/actor1_imdb_score.png", device = "png")
 ```
 
-### $\text{Distributor} \sim y$
+### Distributor ~ IMDB Score
 
-```{r fig.width = 12, fig.height=8}
+```{r fig.width=15, fig.height=8}
 data %>%
   filter(distributor %in%
            (data %>%
@@ -268,10 +283,10 @@ data %>%
               count(sort = TRUE) %>%
               head(10))$distributor) %>%
   ggplot(aes(x = distributor, y = imdb_score, fill = distributor)) +
-  geom_boxplot(outlier.size = 3) +
-  geom_text_repel(aes(label = movie_title), max.overlaps = 5) +
+  geom_boxplot(outlier.size = 2) +
+  geom_text_repel(aes(label = movie_title), max.overlaps = 2, size = 4) +
   scale_fill_tableau(palette = "Tableau 20") +
-  scale_y_continuous(breaks = breaks_pretty(), limits = c(0, 10)) +
+  scale_y_continuous(breaks = breaks_pretty(n=10), limits = c(0, 10)) +
   guides(fill = "none") +
   labs(
     x = "Distributor",
@@ -280,9 +295,9 @@ data %>%
     subtitle = "Top 10 distributors by number of movies shown"
   ) +
   theme_pubr() +
-  theme_lox() +
-  coord_flip()
-  
+  theme_lox()
+
+ggsave(filename = "plots/distributor_imdb_score.png", device = "png")
 ```
 
 # Data preprocessing
@@ -334,17 +349,6 @@ data_cleaned <- data_cleaned %>%
     .fns = ~ scale(.) %>% as.vector()
   ))
 ```
-
-
-## Checking for multicollinearity
-
-```{r}
-vif_model <- lm(imdb_score ~ ., data = (data_cleaned %>% select(where(is.numeric))))
-
-vif(vif_model)
-```
-
-We see that there is no multicollinearity among the numeric variables in the dataset.
 
 ## Feature engineering
 
@@ -438,6 +442,72 @@ for (distributor in top_5_distributors$distributor) {
 }
 ```
 
+## Checking heteroscedasticity and linearity
+```{r fig.width=15, fig.height=8}
+numerical_predictors <-
+  c(
+    "movie_budget",
+    "duration",
+    "nb_news_articles",
+    "nb_faces",
+    "actor1_star_meter",
+    "actor2_star_meter",
+    "actor3_star_meter",
+    "movie_meter_IMDBpro"
+  )
+
+for (predictor in numerical_predictors) {
+
+  print(glue("Running checks for: ", predictor))
+
+  # Run linear model
+  lin_reg_predictor <-
+    lm(formula(paste("imdb_score ~", predictor)), data = data_cleaned)
+  
+  print(summary(lin_reg_predictor))
+  # Run non-constant variance test
+  print(ncvTest(lin_reg_predictor))
+  
+  
+  # Generate a scatterplot
+  print(
+    ggplot(data, aes(
+      x = !!sym(predictor), y = imdb_score
+    )) +
+      geom_point() +
+      geom_smooth(method = lm) +
+      scale_x_continuous(breaks = breaks_pretty()) +
+      labs(y = "IMDb Score",
+           title = paste("IMDb score ~ ", predictor)) +
+      theme_pubr() +
+      theme_lox()
+  )
+  
+  # Check for linearity
+  residualPlots(lin_reg_predictor)
+}
+```
+We see that
+- All predictors except the `actor_star_meters` are statistically significant
+- `movie_budget`, `duration`, and `movie_meter_IMDBpro` have heteroskedasticity
+- `movie_budget` and `nb_faces` are linear, while the other numeric columns are non-linear.
+
+
+## Checking for multicollinearity
+```{r}
+data_cleaned %>%
+  select(numerical_predictors) %>%
+  cor() %>%
+  round(2) %>%
+  corrplot(method = "number", type = "full", tl.col = "black")
+
+vif_model <- lm(imdb_score ~ ., data = (data_cleaned %>% select(where(is.numeric))))
+
+vif(vif_model)
+```
+
+We see that there is no multicollinearity among the numeric variables in the dataset.
+
 ## Removing variables
 
 ```{r}
@@ -453,6 +523,9 @@ columns_to_remove <-
     "release_day",
     "release_year",
     "colour_film",
+    "actor1_star_meter",
+    "actor2_star_meter",
+    "actor3_star_meter",
     "director", 
     "cinematographer", 
     "production_company",
@@ -470,30 +543,70 @@ data_cleaned %>% head()
 ```
 
 # Model building
-
-## Basic linear regression - using all features
+## Individual linear regression
 ```{r}
+individual_regressions <- colnames(data_cleaned) %>%
+  setdiff("imdb_score") %>%
+  syms() %>%
+  map(~expr(lm(imdb_score ~ !!.x, data = data_cleaned))) %>%
+  map(eval.parent) %>%
+  map(tidy) %>%
+  bind_rows() %>%
+  filter(term != "(Intercept)")
+```
+
+```{r}
+individual_regressions %>%
+  filter(!p.value < 0.05)
+```
+
+We see that individually, most of the non-significant predictors (at 5% level) are the dummy variables for release month, genre, plot, and distribution. For completeness, we choose to keep these variables in our model.
+
+```{r fig.width = 15, fig.height = 8}
+individual_regressions %>%
+  filter(!p.value > 0.05) %>%
+  arrange(p.value) %>%
+  ggplot(aes(x = fct_reorder(term, -p.value), y = estimate)) +
+  geom_col(aes(fill = estimate < 0)) +
+  scale_fill_fivethirtyeight() +
+  scale_y_continuous(breaks = pretty_breaks(n = 10)) +
+  guides(fill = "none") +
+  labs(
+    x = "Variable",
+    y = "Estimate",
+    title = "Estimated coefficents for IMDB Score",
+    subtitle = "Individual regressions for each variable; Only significant predictors shown (5% level)"
+  ) +
+  theme_pubr() +
+  theme_lox() +
+  theme(panel.grid.major.y = element_blank()) +
+  coord_flip()
+
+ggsave(filename = "plots/individual_regressions.png", device = "png")
+```
+
+## Multiple linear regression
+```{r fig.width=15, fig.height=8}
 lin_reg_1 <- lm(imdb_score ~ ., data=data_cleaned)
 summary(lin_reg_1)
 residualPlot(lin_reg_1)
 ```
-### Checking for outliers
+### Checking and removing outliers
 ```{r}
 outlierTest(lin_reg_1)
-```
-```{r}
+
 outliers <- names(outlierTest(lin_reg_1)[[1]])
 data_cleaned <- data_cleaned %>% filter(!row_number() %in% outliers)
 ```
 
 ### Running the model with outliers removed
-```{r}
+```{r fig.width=15, fig.height=8}
 lin_reg_2 <- lm(imdb_score ~ ., data=data_cleaned)
 summary(lin_reg_2)
 residualPlot(lin_reg_2)
 ```
 
-After removing the outliers, we see that the non-linearity has reduced. Let us now check for heteroskedasticity.
+After removing the outliers, we see that the non-linearity has reduced. Let us now check for heteroskedasticity in the entire model.
 
 ### Heteroskedasticity
 ```{r}
@@ -501,11 +614,32 @@ ncvTest(lin_reg_2)
 ```
 
 Since the model contains heteroskedasticity, we can check the corrected coefficients.
-```{r}
-coeftest(lin_reg_2, vcov = vcovHC(lin_reg_2, type = "HC1"))
+```{r fig.width=15, fig.height=8}
+coeftest(lin_reg_2, vcov = vcovHC(lin_reg_2, type = "HC1")) %>% 
+  tidy() %>%
+  filter(term != "(Intercept)") %>%
+  filter(!p.value > 0.05) %>%
+  arrange(p.value) %>%
+  ggplot(aes(x = fct_reorder(term, -p.value), y = estimate)) +
+  geom_col(aes(fill = estimate < 0)) +
+  scale_fill_fivethirtyeight() +
+  scale_y_continuous(breaks = pretty_breaks(n = 10)) +
+  guides(fill = "none") +
+  labs(
+    x = "Variable",
+    y = "Estimate",
+    title = "Heteroskedasticity corrected estimated coefficents for IMDB Score",
+    subtitle = "Only significant predictors shown (5% level)"
+  ) +
+  theme_pubr() +
+  theme_lox() +
+  theme(panel.grid.major.y = element_blank()) +
+  coord_flip()
+
+ggsave(filename = "plots/multiple_linear_regression.png", device = "png")
 ```
 
-### Performance
+### Baseline performance
 ```{r}
 predicted_scores <- predict(lin_reg_2, data_cleaned)
 actual_scores <- data_cleaned$imdb_score
@@ -516,65 +650,50 @@ print(glue("Linear regression RMSE: {rmse}"))
 ```
 
 ## Linear regression - K-fold
+
+To evaluate out-of-sample performance, we use K-fold cross-validation
 ```{r}
-sample <- sample.split(data_cleaned$imdb_score, SplitRatio = 0.7)
-train <- subset(data_cleaned, sample == TRUE)
-test <- subset(data_cleaned, sample == FALSE)
+set.seed(420)
 
-lin_reg_k <- glm(imdb_score ~ ., data = train)
-mse_train_lin_reg_k <- cv.glm(train, lin_reg_k, K = 5)$delta[1]
-rmse_train_lin_reg_k <- sqrt(mse_train_lin_reg_k)
+lin_reg_k <- glm(imdb_score ~ ., data = data_cleaned)
+mse_lin_reg_k <- cv.glm(data_cleaned, lin_reg_k, K = 20)$delta[1]
+rmse_lin_reg_k <- sqrt(mse_lin_reg_k)
 
-mse_test_lin_reg_k <- mean((predict(lin_reg_k, test) - test$imdb_score)^2)
-rmse_test_lin_reg_k <- sqrt(mse_test_lin_reg_k)
-
-
-print(glue("Training set MSE: {mse_train_lin_reg_k}"))
-print(glue("Training set RMSE: {rmse_train_lin_reg_k}"))
-print(glue("Test set MSE: {mse_test_lin_reg_k}"))
-print(glue("Test set RMSE: {rmse_test_lin_reg_k}"))
+print(glue("Linear regression MSE: {mse_lin_reg_k}"))
+print(glue("Linear regression RMSE: {rmse_lin_reg_k}"))
 ```
-
-## 
-```{r}
-
-```
-
 
 ## Polynomial regression
 
-Before running a polynomial regression, let us check the linearity of predictors in the linear regression model
 ```{r}
-residualPlots(lin_reg_k, terms= ~ movie_budget + duration + nb_news_articles + movie_meter_IMDBpro)
-```
-
-```{r}
-poly_k_fold_mse <- function(d1, d2, d3, d4, k) {
-  poly_k_fold <- glm(imdb_score ~ poly(movie_budget, d1) + poly(duration, d2) + poly(nb_news_articles, d3) + poly(movie_meter_IMDBpro, d4) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro, data = data_cleaned)
+set.seed(420)
+poly_k_fold_mse <- function(d1, d2, d3, k) {
+  poly_k_fold <-
+    glm(
+      imdb_score ~ movie_budget + poly(duration, d1, raw = d1 == 1) + poly(nb_news_articles, d2, raw = d2 == 1) + poly(movie_meter_IMDBpro, d3, raw = d3 == 1) + . - duration - nb_news_articles - movie_meter_IMDBpro,
+      data = data_cleaned
+    )
   
   mse_k_fold <- cv.glm(data_cleaned, poly_k_fold, K = k)$delta[1]
-  print(glue("MSE for degrees ({d1}, {d2}, {d3}, {d4}) on {k}-fold CV: {mse_k_fold}"))
+  print(glue("MSE for degrees ({d1}, {d2}, {d3}) on {k}-fold CV: {mse_k_fold}"))
   mse_k_fold
 }
 ```
 
 
 ### Finding the optimal degree for numeric features using K-fold CV
-```{r}
+```{r warnings=FALSE}
 mse_poly_k_fold_df = data.frame(
-  i = rep(NA, 4 ^ 4),
-  j = rep(NA, 4 ^ 4),
-  k = rep(NA, 4 ^ 4),
-  l = rep(NA, 4 ^ 4),
-  mse = rep(NA, 4 ^ 4)
+  i = NA,
+  j = NA,
+  k = NA,
+  mse = NA
 )
-for (i in 2:5) {
-  for (j in 2:5) {
-    for (k in 2:5) {
-      for (l in 2:5) {
-        mse_poly_k_fold_df[nrow(mse_poly_k_fold_df) + 1, ] <-
-          c(i, j, k, l, poly_k_fold_mse(i, j, k, l, 5))
-      }
+for (i in 1:5) {
+  for (j in 1:5) {
+    for (k in 1:5) {
+      mse_poly_k_fold_df[nrow(mse_poly_k_fold_df) + 1,] <-
+        c(i, j, k, poly_k_fold_mse(i, j, k, 5))
     }
   }
 }
@@ -583,12 +702,15 @@ for (i in 2:5) {
 ```{r}
 mse_poly_k_fold_df[which.min(mse_poly_k_fold_df$mse), ]
 ```
+
 ### Polynomial regression model with optimal degrees 
 ```{r}
-poly_k_fold <- glm(imdb_score ~ poly(movie_budget, 3) + poly(duration, 2) + poly(nb_news_articles, 5) + poly(movie_meter_IMDBpro, 5) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro, data = data_cleaned)
+set.seed(420)
+poly_k_fold <- glm(imdb_score ~ movie_budget + poly(duration, 2) + poly(nb_news_articles, 4) + poly(movie_meter_IMDBpro, 5) + . - duration - nb_news_articles - movie_meter_IMDBpro, data = data_cleaned)
 
-mse_poly_k_fold <- cv.glm(data_cleaned, poly_k_fold, K = 10)$delta[1]
+mse_poly_k_fold <- cv.glm(data_cleaned, poly_k_fold, K = 20)$delta[1]
 rmse_poly_k_fold <- sqrt(mse_poly_k_fold)
+
 print(glue("Polynomial MSE: {mse_poly_k_fold}"))
 print(glue("Polynomial RMSE: {rmse_poly_k_fold}"))
 ```
@@ -599,11 +721,7 @@ print(glue("Polynomial RMSE: {rmse_poly_k_fold}"))
 ```{r}
 spline_model_1 <- glm(
   imdb_score ~
-    bs(
-      movie_budget,
-      knots = quantile(data_cleaned$movie_budget, c(0.25, 0.5, 0.75)),
-      degree = 3
-    ) +
+    movie_budget +
     bs(
       duration,
       knots = quantile(data_cleaned$duration, c(0.25, 0.5, 0.75)),
@@ -618,23 +736,51 @@ spline_model_1 <- glm(
       movie_meter_IMDBpro,
       knots = quantile(data_cleaned$movie_meter_IMDBpro, c(0.25, 0.5, 0.75)),
       degree = 1
-    ) + . - movie_budget - duration - nb_news_articles - movie_meter_IMDBpro,
+    ) + . - duration - nb_news_articles - movie_meter_IMDBpro,
   data = data_cleaned
 )
 ```
-### Running K-fold cross-validation
-```{r}
-cv_results <- cv.glm(data_cleaned, spline_model_1, K = 10)
-mse <- cv_results$delta[1]
-rmse <- sqrt(mse)
-r_squared <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
 
-print(glue("Spline MSE: {mse}"))
-print(glue("Spline RMSE: {rmse}"))
-print(glue("R-squared: {r_squared}"))
+### Running K-fold cross-validation
+```{r warning=FALSE}
+set.seed(420)
+mse_spline_k_fold <- cv.glm(data_cleaned, spline_model_1, K = 20)$delta[1]
+rmse_spline_k_fold <- sqrt(mse_spline_k_fold)
+r_squared_spline_k_fold <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
+
+print(glue("Spline MSE: {mse_spline_k_fold}"))
+print(glue("Spline RMSE: {rmse_spline_k_fold}"))
+print(glue("R-squared: {r_squared_spline_k_fold}"))
+```
+## Reporting overall performance
+```{r warning=FALSE, results='asis'}
+performance <-
+  data.frame(
+    linear=c(
+      mse_lin_reg_k,
+      rmse_lin_reg_k,
+      length(lin_reg_k$coefficients) - 1
+    ),
+    poly=c(
+      mse_poly_k_fold,
+      rmse_poly_k_fold,
+      length(poly_k_fold$coefficients) - 1
+    ),
+    spline=c(
+      mse_spline_k_fold,
+      rmse_spline_k_fold,
+      length(spline_model_1$coefficients) - 1
+    )
+  )
+
+names(performance) <- c("Linear", "Polynomial", "Spline")
+rownames(performance) <- c("MSE", "RMSE", "Number of predictors")
+
+stargazer(performance, header = FALSE, digits = 2, type = "latex", out = "tables/model_performance.html", summary = FALSE, title = "Model performance")
 ```
 
-# Using the model
+
+# Using the models
 ```{r}
 test_data <- read.csv("./test_data_IMDB_Fall_2023.csv")
 test_data
@@ -716,8 +862,11 @@ columns_to_remove <-
     "genres",
     "release_year",
     "colour_film",
-    "director", 
-    "cinematographer", 
+    'actor1_star_meter',
+    'actor2_star_meter',
+    'actor3_star_meter',
+    "director",
+    "cinematographer",
     "production_company",
     "language",
     "country",
@@ -731,99 +880,53 @@ test_data_cleaned <- test_data_cleaned %>% select(-all_of(columns_to_remove))
 ```{r}
 test_data_cleaned
 ```
-
-## Predicting
-```{r}
+## Predicting ratings of new movies
+```{r warning=FALSE}
 lin_reg_predict <- as.data.frame(predict(lin_reg_k, test_data_cleaned))
 poly_reg_predict <- as.data.frame(predict(poly_k_fold, test_data_cleaned))
 spline_reg_predict <- as.data.frame(predict(spline_model_1, test_data_cleaned))
 
-predictions <- data.frame(test_data$movie_title, lin_reg_predict, poly_reg_predict, spline_reg_predict)
-names(predictions) <- c("movie_title", "lin_reg", "poly_reg", "spline_reg")
+predictions <-
+  data.frame(
+    test_data$movie_title,
+    dmy(
+      str_c(
+        test_data$release_day,
+        test_data$release_month,
+        test_data$release_year,
+        sep = "-"
+      )
+    ),
+    lin_reg_predict,
+    poly_reg_predict,
+    spline_reg_predict
+  )
+
+
+names(predictions) <- c("Movie Title", "Release Date" ,"Linear", "Polynomial", "Spline")
 
 predictions
 ```
-
-# Presenting models
-## Linear regression
-```{r include=FALSE}
-names(lin_reg_2$coefficients) <- c(
-  "Intercept",
-  "Movie Budget",
-  "Released in February",
-  "Released in March",
-  "Released in April",
-  "Released in May",
-  "Released in June",
-  "Released in July",
-  "Released in August",
-  "Released in September",
-  "Released in October",
-  "Released in November",
-  "Released in December",
-  "Duration",
-  "G Rating",
-  "PG Rating",
-  "PG-13 Rating",
-  "R Rating",
-  "Other Maturity Rating",
-  "Aspect Ratio 1.85",
-  "Aspect Ratio 2.35",
-  "Other Aspect Ratio",
-  "News Articles",
-  "Actor 1 Star Meter",
-  "Actor 2 Star Meter",
-  "Actor 3 Star Meter",
-  "Number of Faces in Poster",
-  "Action Genre",
-  "Adventure Genre",
-  "Sci-Fi Genre",
-  "Thriller Genre",
-  "Musical Genre",
-  "Romance Genre",
-  "Western Genre",
-  "Sport Genre",
-  "Horror Genre",
-  "Drama Genre",
-  "War Genre",
-  "Animation Genre",
-  "Crime Genre",
-  "IMDB Pro Meter",
-  "Plot Involves Murder",
-  "Plot Involves Love",
-  "Plot Involves Friends",
-  "Plot Involves Death",
-  "Plot Involves High School",
-  "Plot Involves Police",
-  "Plot Set in New York City",
-  "Plot Involves a Boy",
-  "Plot Involves Drugs",
-  "Plot Involves School",
-  "Distributed by Warner Bros.",
-  "Distributed by Universal Pictures",
-  "Distributed by Paramount Pictures",
-  "Distributed by Twentieth Century Fox",
-  "Distributed by Columbia Pictures Corporation"
-)
-
-# stargazer(lin_reg_2, type = "html", out = "lin_reg.html", dep.var.labels = c("IMDB Score"))
+```{r}
+stargazer(predictions, header = FALSE, digits = 2, type = "latex", out = "tables/predictions.html", summary = FALSE, title = "Model predictions")
 ```
 
-## Polynomial regression
+```{r}
+poly_k_fold$coefficients
+```
 
-```{r include=FALSE}
+
+# Presenting the final model
+```{r warning=FALSE}
 names(poly_k_fold$coefficients) <- c(
   "Intercept",
   "Movie Budget",
-  "Movie Budget^2",
-  "Movie Budget^3",
   "Duration",
   "Duration^2",
   "News Articles",
   "News Articles^2",
   "News Articles^3",
   "News Articles^4",
-  "News Articles^5",
   "IMDB Pro Meter",
   "IMDB Pro Meter^2",
   "IMDB Pro Meter^3",
@@ -848,135 +951,36 @@ names(poly_k_fold$coefficients) <- c(
   "Aspect Ratio 1.85",
   "Aspect Ratio 2.35",
   "Other Aspect Ratio",
-  "Actor 1 Star Meter",
-  "Actor 2 Star Meter",
-  "Actor 3 Star Meter",
   "Number of Faces in Poster",
-  "Action Genre",
-  "Adventure Genre",
-  "Sci-Fi Genre",
-  "Thriller Genre",
-  "Musical Genre",
-  "Romance Genre",
-  "Western Genre",
-  "Sport Genre",
-  "Horror Genre",
-  "Drama Genre",
-  "War Genre",
-  "Animation Genre",
-  "Crime Genre",
-  "Plot Involves Murder",
-  "Plot Involves Love",
-  "Plot Involves Friends",
-  "Plot Involves Death",
-  "Plot Involves High School",
-  "Plot Involves Police",
-  "Plot Set in New York City",
-  "Plot Involves a Boy",
-  "Plot Involves Drugs",
-  "Plot Involves School",
-  "Distributed by Warner Bros.",
-  "Distributed by Universal Pictures",
-  "Distributed by Paramount Pictures",
-  "Distributed by Twentieth Century Fox",
-  "Distributed by Columbia Pictures Corporation"
+  "Action",
+  "Adventure",
+  "Sci-Fi",
+  "Thriller",
+  "Musical",
+  "Romance",
+  "Western",
+  "Sport",
+  "Horror",
+  "Drama",
+  "War",
+  "Animation",
+  "Crime",
+  "Plot = Murder",
+  "Plot = Love",
+  "Plot = Friends",
+  "Plot = Death",
+  "Plot = High School",
+  "Plot = Police",
+  "Plot = New York City",
+  "Plot = a Boy",
+  "Plot = Drugs",
+  "Plot = School",
+  "Distributor = Warner Bros.",
+  "Distributor = Universal Pictures",
+  "Distributor = Paramount Pictures",
+  "Distributor = Twentieth Century Fox",
+  "Distributor = Columbia Pictures Corporation"
 )
 
-# stargazer(poly_k_fold, type = "html", out = "poly_reg.html", dep.var.labels = c("IMDB Score"))
+stargazer(poly_k_fold, header = FALSE, digits = 2, type = "latex", out = "tables/polynomial_regression_summary.html", title = "Polynomial regression")
 ```
-
-## Spline regression
-```{r include=FALSE}
-names(spline_model_1$coefficients) <- c(
-  "Intercept",
-  "Movie Budget (B-spline 1)",
-  "Movie Budget (B-spline 2)",
-  "Movie Budget (B-spline 3)",
-  "Movie Budget (B-spline 4)",
-  "Movie Budget (B-spline 5)",
-  "Movie Budget (B-spline 6)",
-  "Duration (B-spline 1)",
-  "Duration (B-spline 2)",
-  "Duration (B-spline 3)",
-  "Duration (B-spline 4)",
-  "Duration (B-spline 5)",
-  "News Articles (B-spline 1)",
-  "News Articles (B-spline 2)",
-  "News Articles (B-spline 3)",
-  "News Articles (B-spline 4)",
-  "IMDB Pro Meter (B-spline 1)",
-  "IMDB Pro Meter (B-spline 2)",
-  "IMDB Pro Meter (B-spline 3)",
-  "IMDB Pro Meter (B-spline 4)",
-  "Released in February",
-  "Released in March",
-  "Released in April",
-  "Released in May",
-  "Released in June",
-  "Released in July",
-  "Released in August",
-  "Released in September",
-  "Released in October",
-  "Released in November",
-  "Released in December",
-  "G Rating",
-  "PG Rating",
-  "PG-13 Rating",
-  "R Rating",
-  "Other Maturity Rating",
-  "Aspect Ratio 1.85",
-  "Aspect Ratio 2.35",
-  "Other Aspect Ratio",
-  "Actor 1 Star Meter",
-  "Actor 2 Star Meter",
-  "Actor 3 Star Meter",
-  "Number of Faces in Poster",
-  "Action Genre",
-  "Adventure Genre",
-  "Sci-Fi Genre",
-  "Thriller Genre",
-  "Musical Genre",
-  "Romance Genre",
-  "Western Genre",
-  "Sport Genre",
-  "Horror Genre",
-  "Drama Genre",
-  "War Genre",
-  "Animation Genre",
-  "Crime Genre",
-  "Plot Involves Murder",
-  "Plot Involves Love",
-  "Plot Involves Friends",
-  "Plot Involves Death",
-  "Plot Involves High School",
-  "Plot Involves Police",
-  "Plot Set in New York City",
-  "Plot Involves a Boy",
-  "Plot Involves Drugs",
-  "Plot Involves School",
-  "Distributed by Warner Bros.",
-  "Distributed by Universal Pictures",
-  "Distributed by Paramount Pictures",
-  "Distributed by Twentieth Century Fox",
-  "Distributed by Columbia Pictures Corporation"
-)
-
-# stargazer(spline_model_1, type = "latex", out = "spline_reg.html", dep.var.labels = c("IMDB Score"))
-```
-
-## All models
-```{r}
-stargazer(
-  lin_reg_2,
-  poly_k_fold,
-  spline_model_1,
-  align = TRUE,
-  model.names = FALSE,
-  type = "latex",
-  dep.var.labels = c("IMDB Score"),
-  column.labels = c("Linear", "Polynomial", "Spline"),
-  digits = 3,
-  out = "overall_reg.html"
-)
-```
-
