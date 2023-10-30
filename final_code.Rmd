@@ -680,7 +680,6 @@ poly_k_fold_mse <- function(d1, d2, d3, k) {
 }
 ```
 
-
 ### Finding the optimal degree for numeric features using K-fold CV
 ```{r warnings=FALSE}
 mse_poly_k_fold_df = data.frame(
@@ -736,7 +735,7 @@ spline_model_1 <- glm(
       movie_meter_IMDBpro,
       knots = quantile(data_cleaned$movie_meter_IMDBpro, c(0.25, 0.5, 0.75)),
       degree = 1
-    ) + . - duration - nb_news_articles - movie_meter_IMDBpro,
+    ) + . -movie_budget - duration - nb_news_articles - movie_meter_IMDBpro,
   data = data_cleaned
 )
 ```
@@ -915,6 +914,11 @@ stargazer(predictions, header = FALSE, digits = 2, type = "latex", out = "tables
 poly_k_fold$coefficients
 ```
 
+## Running ANOVA
+```{r}
+anova(lin_reg_k, poly_k_fold, spline_model_1, test = "F")
+```
+From the ANOVA, we see that the spline regression model has the lowest residuals. However, when we check the predicitions, we see that the spline model actually provides a rating prediction outside the boundary of 0-10. Therefore, we decide to go with the polynomial regression model as our final model.
 
 # Presenting the final model
 ```{r warning=FALSE}
