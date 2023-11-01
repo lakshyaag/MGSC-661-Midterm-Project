@@ -119,14 +119,6 @@ INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tool
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/appendix/appendix.sty
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/appendix/appendix.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/listings.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/listings.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstmisc.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstmisc.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstmisc.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/listings.cfg
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/listings.cfg
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/listings.cfg
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT ./report.aux
@@ -178,7 +170,6 @@ INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/publ
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmr8.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmr6.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmmi12.tfm
@@ -197,6 +188,7 @@ INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/publ
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
+INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
 INPUT ./plots/imdb_score.png
 INPUT ./plots/imdb_score.png
 INPUT ./plots/imdb_score.png
@@ -248,37 +240,11 @@ INPUT ./plots/corr_plot.png
 INPUT ./plots/corr_plot.png
 INPUT ./plots/corr_plot.png
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmti12.tfm
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang1.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang2.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang2.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang2.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang3.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang3.sty
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/listings/lstlang3.sty
-INPUT ./final_code.Rmd
-INPUT ./final_code.Rmd
-INPUT final_code.Rmd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omscmr.fd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omscmr.fd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omscmr.fd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omlcmr.fd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omlcmr.fd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/omlcmr.fd
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/public/cm/cmmib10.tfm
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/jknappen/ec/tcbx1200.tfm
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/tfm/jknappen/ec/tcti1200.tfm
 INPUT report.aux
 INPUT ./report.out
 INPUT ./report.out
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcti1200.600pk
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcbx1200.600pk
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb
-INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb
 INPUT c:/Users/Lakshya Agarwal/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb
