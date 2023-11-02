@@ -80,7 +80,7 @@ theme_lox <- function() {
 ```
 
 ```{r}
-data <- read.csv("./IMDB_data_Fall_2023.csv")
+data <- read.csv("./data/IMDB_data_Fall_2023.csv")
 ```
 
 # Exploratory data analysis
@@ -101,7 +101,7 @@ ggplot(data, aes(x = imdb_score)) +
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/imdb_score.png", device = "png")
 ```
 
 ### Movie budget
@@ -114,7 +114,7 @@ ggplot(data, aes(x = movie_budget)) +
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/movie_budget.png", device = "png")
+ggsave(filename = "./deliverables/plots/movie_budget.png", device = "png")
 ```
 
 ### Release year
@@ -127,7 +127,7 @@ ggplot(data, aes(x = release_year)) +
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/release_year.png", device = "png")
+ggsave(filename = "./deliverables/plots/release_year.png", device = "png")
 ```
 
 ### Release month
@@ -142,7 +142,7 @@ ggplot(data, aes(x = factor(release_month,levels = month.abb))) +
   theme_lox() +
   theme(panel.grid.major.x = element_blank())
   
-ggsave(filename = "plots/release_month.png", device = "png")
+ggsave(filename = "./deliverables/plots/release_month.png", device = "png")
 ```
 
 ### Number of faces
@@ -155,7 +155,7 @@ ggplot(data, aes(x = nb_faces)) +
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/number_faces.png", device = "png")
+ggsave(filename = "./deliverables/plots/number_faces.png", device = "png")
 ```
 
 ### Duration
@@ -169,7 +169,7 @@ ggplot(data, aes(x = duration)) +
   theme_lox() +
   theme(axis.ticks.y = element_blank(), axis.text.y = element_blank())
 
-ggsave(filename = "plots/duration.png", device = "png")
+ggsave(filename = "./deliverables/plots/duration.png", device = "png")
 ```
 
 ## Bivariate distributions
@@ -185,7 +185,7 @@ ggplot(data, aes(x = movie_budget, y = imdb_score)) +
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/movie_budget_imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/movie_budget_imdb_score.png", device = "png")
 ```
 
 ### Duration ~ IMDB Score
@@ -199,7 +199,7 @@ ggplot(data, aes(x = duration, y = imdb_score)) +
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/duration_imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/duration_imdb_score.png", device = "png")
 ```
 
 ### Genre ~ IMDB Score
@@ -220,7 +220,7 @@ data %>%
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/genre_imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/genre_imdb_score.png", device = "png")
 ```
 
 ### Release Month ~ IMDB Score
@@ -239,7 +239,7 @@ data %>%
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/release_month_imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/release_month_imdb_score.png", device = "png")
 ```
 
 ### Actor 1 ~ IMDB Score
@@ -271,7 +271,7 @@ data %>%
   theme_pubr() +
   theme_lox()
 
-ggsave(filename = "plots/actor1_imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/actor1_imdb_score.png", device = "png")
 ```
 
 ### Distributor ~ IMDB Score
@@ -299,7 +299,7 @@ data %>%
   theme_lox() +
   coord_flip()
 
-ggsave(filename = "plots/distributor_imdb_score.png", device = "png")
+ggsave(filename = "./deliverables/plots/distributor_imdb_score.png", device = "png")
 ```
 
 # Data preprocessing
@@ -503,7 +503,7 @@ data_cleaned %>%
   round(2) %>%
   ggcorr(digits = 2, label = TRUE, label_alpha = 0.5)
 
-ggsave(filename = "plots/corr_plot.png", device = "png")
+ggsave(filename = "./deliverables/plots/corr_plot.png", device = "png")
 
 vif_model <- lm(imdb_score ~ ., data = (data_cleaned %>% select(where(is.numeric))))
 
@@ -586,7 +586,7 @@ individual_regressions %>%
   theme(panel.grid.major.y = element_blank()) +
   coord_flip()
 
-ggsave(filename = "plots/individual_regressions.png", device = "png")
+ggsave(filename = "./deliverables/plots/individual_regressions.png", device = "png")
 ```
 
 ## Multiple linear regression
@@ -640,7 +640,7 @@ coeftest(lin_reg_2, vcov = vcovHC(lin_reg_2, type = "HC1")) %>%
   theme(panel.grid.major.y = element_blank()) +
   coord_flip()
 
-ggsave(filename = "plots/multiple_linear_regression.png", device = "png")
+ggsave(filename = "./deliverables/plots/multiple_linear_regression.png", device = "png")
 ```
 
 ### Baseline performance
@@ -781,12 +781,12 @@ performance <-
 names(performance) <- c("Linear", "Polynomial", "Spline")
 rownames(performance) <- c("MSE", "RMSE", "R^2", "Number of predictors")
 
-stargazer(performance, header = FALSE, digits = 2, type = "latex", out = "tables/model_performance.html", summary = FALSE, title = "Model performance")
+stargazer(performance, header = FALSE, digits = 2, type = "latex", out = "./deliverables/tables/model_performance.html", summary = FALSE, title = "Model performance")
 ```
 
 # Using the models
 ```{r}
-test_data <- read.csv("./test_data_IMDB_Fall_2023.csv")
+test_data <- read.csv("./data/test_data_IMDB_Fall_2023.csv")
 test_data
 ```
 ## Cleaning test data
@@ -912,7 +912,7 @@ names(predictions) <- c("Movie Title", "Release Date" ,"Linear", "Polynomial", "
 predictions
 ```
 ```{r}
-stargazer(predictions, header = FALSE, digits = 2, type = "latex", out = "tables/predictions.html", summary = FALSE, title = "Model predictions")
+stargazer(predictions, header = FALSE, digits = 2, type = "latex", out = "./deliverables/tables/predictions.html", summary = FALSE, title = "Model predictions")
 ```
 
 ## Running ANOVA
@@ -992,7 +992,7 @@ coeftest(poly_k_fold, vcov = vcovHC(poly_k_fold, type = "HC1")) %>%
     header = FALSE,
     digits = 2,
     type = "latex",
-    out = "tables/polynomial_regression_summary.html",
+    out = "./deliverables/tables/polynomial_regression_summary.html",
     title = "Polynomial regression"
   )
 ```

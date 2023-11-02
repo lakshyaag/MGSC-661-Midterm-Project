@@ -29,7 +29,6 @@ require(boot)
 require(tidyverse)
 require(dplyr)
 require(glue)
-require(GGally)
 require(broom)
 
 
@@ -748,11 +747,9 @@ spline_model_1 <- glm(
 set.seed(420)
 mse_spline_k_fold <- cv.glm(data_cleaned, spline_model_1, K = 20)$delta[1]
 rmse_spline_k_fold <- sqrt(mse_spline_k_fold)
-r_squared_spline_k_fold <- 1 - (spline_model_1$deviance / spline_model_1$null.deviance)
 
 print(glue("Spline MSE: {mse_spline_k_fold}"))
 print(glue("Spline RMSE: {rmse_spline_k_fold}"))
-print(glue("R-squared: {r_squared_spline_k_fold}"))
 ```
 ## Reporting overall performance
 ```{r warning=FALSE, results='asis'}
