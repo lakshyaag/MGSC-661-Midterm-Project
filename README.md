@@ -24,7 +24,7 @@ After data preprocessing and exploratory data analysis, we fit three regression 
 1. **Clone the repo**:
 
    ```git
-   git clone [repository_link]
+   git clone https://github.com/lakshyaag/MGSC-661-Midterm-Project
    ```
 
 2. Navigate to the data directory to view the dataset and the data dictionary.
